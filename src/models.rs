@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Selectable, Serialize)]
+#[derive(Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone)]
 #[diesel(table_name = crate::schema::target)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Target {
