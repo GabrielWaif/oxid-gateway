@@ -6,7 +6,7 @@ use axum::{
     routing::post,
     Json, Router,
 };
-use axum_review::{
+use oxid_gateway::{
     models::{NewTarget, Target},
     schema::target,
 };
