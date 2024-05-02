@@ -14,7 +14,7 @@ diesel::table! {
         name -> Varchar,
         path -> Varchar,
         inner_path -> Varchar,
-        upstream_id -> Nullable<Int4>,
+        upstream_id -> Int4,
     }
 }
 

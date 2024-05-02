@@ -22,6 +22,18 @@ async fn main() {
         .route("/targets/:id", get(get_target))
         .route("/targets/:id", delete(delete_target))
         .route("/targets/:id", put(update_target))
+        .route("/upstreams", post(create_target))
+        .route("/upstreams/:id", get(get_target))
+        .route("/upstreams/:id", delete(delete_target))
+        .route("/upstreams/:id", put(update_target))
+        .route("/routes", post(create_target))
+        .route("/routes/:id", get(get_target))
+        .route("/routes/:id", delete(delete_target))
+        .route("/routes/:id", put(update_target))
+        .route("/consumers", post(create_target))
+        .route("/consumers/:id", get(get_target))
+        .route("/consumers/:id", delete(delete_target))
+        .route("/consumers/:id", put(update_target))
         .with_state(AppState { pool });
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

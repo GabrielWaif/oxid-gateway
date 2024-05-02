@@ -22,7 +22,7 @@ CREATE TABLE routes (
   name VARCHAR NOT NULL,
   path VARCHAR NOT NULL,
   inner_path VARCHAR NOT NULL,
-  upstream_id INTEGER REFERENCES upstreams(id)
+  upstream_id INTEGER NOT NULL REFERENCES upstreams(id)
 );
 
 CREATE TABLE consumers (
