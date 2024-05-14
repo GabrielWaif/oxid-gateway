@@ -1,5 +1,5 @@
 -- Your SQL goes here
-CREATE TABLE target (
+CREATE TABLE targets (
   id SERIAL PRIMARY KEY,
   name VARCHAR NOT NULL,
   host VARCHAR NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE upstreams (
 
 CREATE TABLE target_upstream (
   upstream_id INTEGER REFERENCES upstreams(id),
-  target_id INTEGER REFERENCES target(id),
+  target_id INTEGER REFERENCES targets(id),
   PRIMARY KEY(upstream_id, target_id)
 );
 

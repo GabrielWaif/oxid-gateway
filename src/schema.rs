@@ -19,18 +19,18 @@ diesel::table! {
 }
 
 diesel::table! {
-    target (id) {
-        id -> Int4,
-        name -> Varchar,
-        host -> Varchar,
-        port -> Int4,
+    target_upstream (upstream_id, target_id) {
+        upstream_id -> Int4,
+        target_id -> Int4,
     }
 }
 
 diesel::table! {
-    target_upstream (upstream_id, target_id) {
-        upstream_id -> Int4,
-        target_id -> Int4,
+    targets (id) {
+        id -> Int4,
+        name -> Varchar,
+        host -> Varchar,
+        port -> Int4,
     }
 }
 
@@ -42,13 +42,13 @@ diesel::table! {
 }
 
 diesel::joinable!(routes -> upstreams (upstream_id));
-diesel::joinable!(target_upstream -> target (target_id));
+diesel::joinable!(target_upstream -> targets (target_id));
 diesel::joinable!(target_upstream -> upstreams (upstream_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     consumers,
     routes,
-    target,
     target_upstream,
+    targets,
     upstreams,
 );
