@@ -3,6 +3,7 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use axum::http::StatusCode;
+use utoipa::ToSchema;
 
 use crate::{database_utils::get_pool_connection, schema::targets::{self, host, name}};
 
@@ -10,7 +11,7 @@ use diesel::{ExpressionMethods, RunQueryDsl, SelectableHelper};
 
 use crate::infra::errors::{adapt_infra_error, InfraError};
 
-#[derive(Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone)]
+#[derive(Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema)]
 #[diesel(table_name = crate::schema::targets)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Target {
@@ -20,7 +21,7 @@ pub struct Target {
     pub port: i32,
 }
 
-#[derive(Queryable, Insertable, Deserialize, Serialize)]
+#[derive(Queryable, Insertable, Deserialize, Serialize, ToSchema)]
 #[diesel(table_name = crate::schema::targets)]
 pub struct NewTarget {
     pub name: String,

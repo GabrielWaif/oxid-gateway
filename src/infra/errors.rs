@@ -9,6 +9,7 @@ pub enum InfraError {
 }
 
 pub fn adapt_infra_error<T: Error>(error: T) -> InfraError {
+    println!("teste");
     error.as_infra_error()
 }
 
@@ -27,6 +28,7 @@ pub trait Error {
 
 impl Error for diesel::result::Error {
     fn as_infra_error(&self) -> InfraError {
+        println!("{:?}", self);
         match self {
             diesel::result::Error::NotFound => InfraError::NotFound,
             _ => InfraError::InternalServerError,

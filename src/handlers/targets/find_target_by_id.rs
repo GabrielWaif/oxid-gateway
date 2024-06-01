@@ -5,16 +5,29 @@ use axum::{
 
 use crate::{
     app_state::AppState,
-    infra::repositories::targets_repository::{self, Target},
+    domain::models::{
+        error::ResultErrors,
+        result_body_container::{ResultBodyContainer, ResultBodyContainerTarget},
+    },
+    infra::repositories::targets_repository,
 };
 
+#[utoipa::path(
+    get,
+    path = "/targets/{id}",
+    operation_id = "find_target_by_id",
+    tag = "Targets",
+    responses (
+        (status = 200, body = ResultBodyContainerTarget)
+    )
+)]
 pub async fn find_target_by_id(
     Path(id): Path<i32>,
     State(app_state): State<AppState>,
-) -> Result<Json<Target>, String> {
+) -> Result<Json<ResultBodyContainerTarget>, ResultErrors> {
     let response = targets_repository::find_by_id(&app_state.pool, id)
         .await
         .unwrap();
 
-    return Ok(Json(response));
+    return Ok(Json(ResultBodyContainer::success(response)));
 }
