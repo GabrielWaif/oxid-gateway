@@ -1,20 +1,15 @@
 -- Your SQL goes here
-CREATE TABLE targets (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
-  host VARCHAR NOT NULL,
-  port INTEGER NOT NULL
-);
-
 CREATE TABLE upstreams (
   id SERIAL PRIMARY KEY,
   name VARCHAR NOT NULL
 );
 
-CREATE TABLE target_upstream (
-  upstream_id INTEGER REFERENCES upstreams(id),
-  target_id INTEGER REFERENCES targets(id),
-  PRIMARY KEY(upstream_id, target_id)
+CREATE TABLE targets (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR NOT NULL,
+  host VARCHAR NOT NULL,
+  port INTEGER NOT NULL,
+  upstream_id INTEGER NOT NULL REFERENCES upstreams(id)
 );
 
 CREATE TABLE routes (

@@ -1,7 +1,7 @@
 use utoipa::OpenApi;
 
 use crate::{
-    domain::models::result_body_container::{ResultBodyContainerTarget, ResultBodyContainerUpstream}, infra::repositories::{targets_repository::{NewTarget, Target}, upstream_repository::{NewUpstream, Upstream}}
+    domain::models::{result_body_container::{ResultBodyContainerTarget, ResultBodyContainerUpstream}, target_form_dto::TargetFormDto}, infra::repositories::{targets_repository::{NewTarget, Target}, upstream_repository::{NewUpstream, Upstream}}
 };
 
 #[derive(OpenApi)]
@@ -15,6 +15,10 @@ use crate::{
         crate::handlers::targets::delete_target::delete_target,
         crate::handlers::targets::find_target_by_id::find_target_by_id,
         crate::handlers::targets::update_target::update_target,
+        crate::handlers::upstreams::create_upstream::create_upstream,
+        crate::handlers::upstreams::delete_upstream::delete_upstream,
+        crate::handlers::upstreams::find_upstream_by_id::find_upstream_by_id,
+        crate::handlers::upstreams::update_upstream::update_upstream,
     ),
     components (
         schemas (
@@ -23,7 +27,8 @@ use crate::{
             ResultBodyContainerTarget,
             ResultBodyContainerUpstream,
             Target,
-            Upstream
+            Upstream,
+            TargetFormDto
         )
     ),
     tags (

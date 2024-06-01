@@ -11,7 +11,7 @@ use crate::{
 
 #[utoipa::path(
     delete,
-    path = "/targets/{id}",
+    path = "/upstream/{upstream_id}/targets/{id}",
     operation_id = "delete_target",
     tag = "Targets",
     responses (
@@ -19,7 +19,7 @@ use crate::{
     )
 )]
 pub async fn delete_target(
-    Path(id): Path<i32>,
+    Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<ResultBodyContainerTarget>, ResultErrors> {
     let response = targets_repository::delete(&app_state.pool, id)

@@ -1,15 +1,23 @@
 use axum::{
-    routing::{delete, get, post, put}, Router
+    routing::{delete, get, post, put},
+    Router,
 };
 
 use dotenvy::dotenv;
 use oxid_gateway::{
     app_state::AppState,
     database_utils::{get_pool_connection, get_postgres_pool, migrate},
-    handlers::targets::{
-        create_target::create_target, delete_target::delete_target,
-        find_target_by_id::find_target_by_id, update_target::update_target,
-    }, openapi::ApiDoc,
+    handlers::{
+        targets::{
+            create_target::create_target, delete_target::delete_target,
+            find_target_by_id::find_target_by_id, update_target::update_target,
+        },
+        upstreams::{
+            create_upstream::create_upstream, delete_upstream::delete_upstream,
+            find_upstream_by_id::find_upstream_by_id, update_upstream::update_upstream,
+        },
+    },
+    openapi::ApiDoc,
 };
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -25,22 +33,22 @@ async fn main() {
     migrate(connection).await;
 
     let app = Router::new()
-        .route("/targets", post(create_target))
-        .route("/targets/:id", get(find_target_by_id))
-        .route("/targets/:id", delete(delete_target))
-        .route("/targets/:id", put(update_target))
-        .route("/upstreams", post(create_target))
-        .route("/upstreams/:id", get(find_target_by_id))
-        .route("/upstreams/:id", delete(delete_target))
-        .route("/upstreams/:id", put(update_target))
-        .route("/routes", post(create_target))
-        .route("/routes/:id", get(find_target_by_id))
-        .route("/routes/:id", delete(delete_target))
-        .route("/routes/:id", put(update_target))
-        .route("/consumers", post(create_target))
-        .route("/consumers/:id", get(find_target_by_id))
-        .route("/consumers/:id", delete(delete_target))
-        .route("/consumers/:id", put(update_target))
+        .route("/upstreams/:upstream_id/targets", post(create_target))
+        .route("/upstreams/:upstream_id/targets/targets/:id", get(find_target_by_id))
+        .route("/upstreams/:upstream_id/targets/targets/:id", delete(delete_target))
+        .route("/upstreams/:upstream_id/targets/targets/:id", put(update_target))
+        .route("/upstreams", post(create_upstream))
+        .route("/upstreams/:id", get(find_upstream_by_id))
+        .route("/upstreams/:id", delete(delete_upstream))
+        .route("/upstreams/:id", put(update_upstream))
+        // .route("/routes", post(create_target))
+        // .route("/routes/:id", get(find_target_by_id))
+        // .route("/routes/:id", delete(delete_target))
+        // .route("/routes/:id", put(update_target))
+        // .route("/consumers", post(create_target))
+        // .route("/consumers/:id", get(find_target_by_id))
+        // .route("/consumers/:id", delete(delete_target))
+        // .route("/consumers/:id", put(update_target))
         .merge(SwaggerUi::new("/swagger-ui").url("/swagger-json", ApiDoc::openapi()))
         .with_state(AppState { pool });
 
