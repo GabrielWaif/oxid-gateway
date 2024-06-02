@@ -11,7 +11,7 @@ use crate::{
 
 #[utoipa::path(
     post,
-    path = "/upstream/{upstream_id}/targets",
+    path = "/upstreams/{upstream_id}/targets",
     operation_id = "create_target",
     tag = "Targets",
     responses (

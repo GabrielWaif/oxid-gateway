@@ -1,7 +1,14 @@
 use utoipa::OpenApi;
 
 use crate::{
-    domain::models::{result_body_container::{ResultBodyContainerTarget, ResultBodyContainerUpstream}, target_form_dto::TargetFormDto}, infra::repositories::{targets_repository::{NewTarget, Target}, upstream_repository::{NewUpstream, Upstream}}
+    domain::models::{
+        result_body_container::{ResultBodyContainerTarget, ResultBodyContainerUpstream},
+        route_form_dto::RouteFormDto,
+        target_form_dto::TargetFormDto,
+    },
+    infra::repositories::{
+        routes_repository::Route, targets_repository::{NewTarget, Target}, upstream_repository::{NewUpstream, Upstream}
+    },
 };
 
 #[derive(OpenApi)]
@@ -19,16 +26,21 @@ use crate::{
         crate::handlers::upstreams::delete_upstream::delete_upstream,
         crate::handlers::upstreams::find_upstream_by_id::find_upstream_by_id,
         crate::handlers::upstreams::update_upstream::update_upstream,
+        crate::handlers::routes::create_route::create_route,
+        crate::handlers::routes::delete_route::delete_route,
+        crate::handlers::routes::find_route_by_id::find_route_by_id,
+        crate::handlers::routes::update_route::update_route,
     ),
     components (
         schemas (
-            NewTarget,
             NewUpstream,
             ResultBodyContainerTarget,
             ResultBodyContainerUpstream,
             Target,
             Upstream,
-            TargetFormDto
+            Route,
+            TargetFormDto,
+            RouteFormDto
         )
     ),
     tags (

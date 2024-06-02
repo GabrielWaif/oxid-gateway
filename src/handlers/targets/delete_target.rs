@@ -11,7 +11,7 @@ use crate::{
 
 #[utoipa::path(
     delete,
-    path = "/upstream/{upstream_id}/targets/{id}",
+    path = "/upstreams/{upstream_id}/targets/{id}",
     operation_id = "delete_target",
     tag = "Targets",
     responses (

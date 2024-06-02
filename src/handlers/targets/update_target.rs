@@ -14,7 +14,7 @@ use crate::{
 
 #[utoipa::path(
     put,
-    path = "/upstream/{upstream_id}/targets/{id}",
+    path = "/upstreams/{upstream_id}/targets/{id}",
     operation_id = "update_target",
     tag = "Targets",
     responses (
