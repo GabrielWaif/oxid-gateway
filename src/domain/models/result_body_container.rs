@@ -1,13 +1,14 @@
 use serde::Serialize;
 use utoipa::ToSchema;
 
-use crate::infra::repositories::{routes_repository::Route, targets_repository::Target, upstream_repository::Upstream};
+use crate::infra::repositories::{consumers_repository::Consumer, routes_repository::Route, targets_repository::Target, upstream_repository::Upstream};
 
 #[derive(Serialize, ToSchema)]
 #[aliases(
     ResultBodyContainerTarget = ResultBodyContainer<Target>,
     ResultBodyContainerUpstream = ResultBodyContainer<Upstream>,
     ResultBodyContainerRoute = ResultBodyContainer<Route>,
+    ResultBodyContainerConsumer = ResultBodyContainer<Consumer>,
 )]
 pub struct ResultBodyContainer<T> {
     pub success: bool,

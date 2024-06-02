@@ -7,7 +7,7 @@ use crate::{
         target_form_dto::TargetFormDto,
     },
     infra::repositories::{
-        routes_repository::Route, targets_repository::{NewTarget, Target}, upstream_repository::{NewUpstream, Upstream}
+        consumers_repository::{Consumer, NewConsumer}, routes_repository::Route, targets_repository::{NewTarget, Target}, upstream_repository::{NewUpstream, Upstream}
     },
 };
 
@@ -30,10 +30,16 @@ use crate::{
         crate::handlers::routes::delete_route::delete_route,
         crate::handlers::routes::find_route_by_id::find_route_by_id,
         crate::handlers::routes::update_route::update_route,
+        crate::handlers::consumers::create_consumer::create_consumer,
+        crate::handlers::consumers::delete_consumer::delete_consumer,
+        crate::handlers::consumers::find_consumer_by_id::find_consumer_by_id,
+        crate::handlers::consumers::update_consumer::update_consumer,
     ),
     components (
         schemas (
             NewUpstream,
+            NewConsumer,
+            Consumer,
             ResultBodyContainerTarget,
             ResultBodyContainerUpstream,
             Target,
