@@ -88,3 +88,23 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, (StatusCode, Strin
 
     return Ok(res);
 }
+
+pub async fn find(pool: &Pool, offset: i64, limit: i64) -> Result<Vec<Consumer>, InfraError> {
+    let manager = get_pool_connection(pool).await;
+
+    let res = manager
+        .interact(move |conn| {
+            consumers::table
+                .select(Consumer::as_select())
+                .offset(offset)
+                .limit(limit)
+                .get_results(conn)
+        })
+        .await
+        .map_err(adapt_infra_error)
+        .unwrap()
+        .map_err(adapt_infra_error)
+        .unwrap();
+
+    return Ok(res);
+}

@@ -1,11 +1,18 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
 
 use crate::{
-    api::{dtos::routes::RouteFormDto, errors::ResultErrors, AppState},
+    api::{
+        dtos::{
+            pagination::{PaginationQueryDto, PaginationResponseDto, RoutesPagination},
+            routes::RouteFormDto,
+        },
+        errors::ResultErrors,
+        AppState,
+    },
     database::{
         entities::routes::{NewRoute, Route},
         repositories,
@@ -107,4 +114,33 @@ pub async fn update_route(
         .unwrap();
 
     return Ok(Json(response));
+}
+
+#[utoipa::path(
+    get,
+    path = "/upstreams/{upstream_id}/routes",
+    operation_id = "find_routes",
+    tag = "Routes",
+    params (
+        PaginationQueryDto
+    ),
+    responses (
+        (status = 200, body = RoutesPagination)
+    )
+)]
+pub async fn find_routes(
+    Path((upstream_id, id)): Path<(i32, i32)>,
+    State(app_state): State<AppState>,
+    pagination: Query<PaginationQueryDto>,
+) -> Result<Json<RoutesPagination>, ResultErrors> {
+    let pagination = pagination.0;
+    let response =
+        repositories::routes::find(&app_state.pool, pagination.offset, pagination.limit)
+            .await
+            .unwrap();
+
+    return Ok(Json(PaginationResponseDto {
+        items: response,
+        count: 0,
+    }));
 }

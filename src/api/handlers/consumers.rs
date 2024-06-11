@@ -1,11 +1,11 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
 
 use crate::{
-    api::{errors::ResultErrors, AppState},
+    api::{dtos::pagination::{ConsumersPagination, PaginationQueryDto, PaginationResponseDto}, errors::ResultErrors, AppState},
     database::{
         entities::consumers::{Consumer, NewConsumer},
         repositories,
@@ -91,4 +91,33 @@ pub async fn update_consumer(
         .unwrap();
 
     return Ok(Json(response));
+}
+
+#[utoipa::path(
+    get,
+    path = "/consumers",
+    operation_id = "find_consumers",
+    tag = "Consumers",
+    params (
+        PaginationQueryDto
+    ),
+    responses (
+        (status = 200, body = ConsumersPagination)
+    )
+)]
+pub async fn find_consumers(
+    Path(id): Path<i32>,
+    State(app_state): State<AppState>,
+    pagination: Query<PaginationQueryDto>,
+) -> Result<Json<ConsumersPagination>, ResultErrors> {
+    let pagination = pagination.0;
+    let response =
+        repositories::consumers::find(&app_state.pool, pagination.offset, pagination.limit)
+            .await
+            .unwrap();
+
+    return Ok(Json(PaginationResponseDto {
+        items: response,
+        count: 0,
+    }));
 }

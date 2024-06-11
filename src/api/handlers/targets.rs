@@ -1,11 +1,11 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
 
 use crate::{
-    api::{dtos::targets::TargetFormDto, errors::ResultErrors, AppState},
+    api::{dtos::{pagination::{PaginationQueryDto, PaginationResponseDto, TargetsPagination}, targets::TargetFormDto}, errors::ResultErrors, AppState},
     database::{
         entities::targets::{NewTarget, Target},
         repositories,
@@ -107,4 +107,33 @@ pub async fn update_target(
         .unwrap();
 
     return Ok(Json(response));
+}
+
+#[utoipa::path(
+    get,
+    path = "/upstreams/{upstream_id}/targets",
+    operation_id = "find_targets",
+    tag = "Targets",
+    params (
+        PaginationQueryDto
+    ),
+    responses (
+        (status = 200, body = TargetsPagination)
+    )
+)]
+pub async fn find_targets(
+    Path((upstream_id, id)): Path<(i32, i32)>,
+    State(app_state): State<AppState>,
+    pagination: Query<PaginationQueryDto>,
+) -> Result<Json<TargetsPagination>, ResultErrors> {
+    let pagination = pagination.0;
+    let response =
+        repositories::targets::find(&app_state.pool, pagination.offset, pagination.limit)
+            .await
+            .unwrap();
+
+    return Ok(Json(PaginationResponseDto {
+        items: response,
+        count: 0,
+    }));
 }

@@ -20,6 +20,7 @@ pub struct AppState {
 
 pub async fn start_server(postgres_pool: Pool) {
     let app = Router::new()
+        .route("/upstreams/:upstream_id/targets", get(find_routes))
         .route("/upstreams/:upstream_id/targets", post(create_target))
         .route(
             "/upstreams/:upstream_id/targets/targets/:id",
@@ -38,10 +39,12 @@ pub async fn start_server(postgres_pool: Pool) {
         .route("/upstreams/:id", get(find_upstream_by_id))
         .route("/upstreams/:id", delete(delete_upstream))
         .route("/upstreams/:id", put(update_upstream))
+        .route("/upstreams/:upstream_id/routes", get(find_routes))
         .route("/upstreams/:upstream_id/routes", post(create_route))
         .route("/upstreams/:upstream_id/routes/:id", get(find_route_by_id))
         .route("/upstreams/:upstream_id/routes/:id", delete(delete_route))
         .route("/upstreams/:upstream_id/routes/:id", put(update_route))
+        .route("/consumers", get(find_consumers))
         .route("/consumers", post(create_consumer))
         .route("/consumers/:id", get(find_consumer_by_id))
         .route("/consumers/:id", delete(delete_consumer))
