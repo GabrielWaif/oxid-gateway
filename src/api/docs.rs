@@ -7,7 +7,11 @@ use crate::database::entities::{
     upstreams::{NewUpstream, Upstream},
 };
 
-use super::dtos::{routes::RouteFormDto, targets::TargetFormDto};
+use super::dtos::{
+    pagination::{ConsumersPagination, RoutesPagination, TargetsPagination, UpstreamsPagination},
+    routes::RouteFormDto,
+    targets::TargetFormDto,
+};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -23,6 +27,7 @@ use super::dtos::{routes::RouteFormDto, targets::TargetFormDto};
         crate::api::handlers::upstreams::create_upstream,
         crate::api::handlers::upstreams::delete_upstream,
         crate::api::handlers::upstreams::find_upstream_by_id,
+        crate::api::handlers::upstreams::find_upstreams,
         crate::api::handlers::upstreams::update_upstream,
         crate::api::handlers::routes::create_route,
         crate::api::handlers::routes::delete_route,
@@ -42,7 +47,11 @@ use super::dtos::{routes::RouteFormDto, targets::TargetFormDto};
             Upstream,
             Route,
             TargetFormDto,
-            RouteFormDto
+            RouteFormDto,
+            UpstreamsPagination,
+            TargetsPagination,
+            ConsumersPagination,
+            RoutesPagination
         )
     ),
     tags (

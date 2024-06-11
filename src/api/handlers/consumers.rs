@@ -18,7 +18,7 @@ use crate::{
     operation_id = "create_consumer",
     tag = "Consumers",
     responses (
-        (status = 201, body = ResultBodyContainerConsumer)
+        (status = 201, body = Consumer)
     )
 )]
 pub async fn create_consumer(
@@ -38,7 +38,7 @@ pub async fn create_consumer(
     operation_id = "delete_consumer",
     tag = "Consumers",
     responses (
-        (status = 200, body = ResultBodyContainerConsumer)
+        (status = 200, body = Consumer)
     )
 )]
 pub async fn delete_consumer(
@@ -58,7 +58,7 @@ pub async fn delete_consumer(
     operation_id = "find_consumer_by_id",
     tag = "Consumers",
     responses (
-        (status = 200, body = ResultBodyContainerConsumer)
+        (status = 200, body = Consumer)
     )
 )]
 pub async fn find_consumer_by_id(
@@ -78,7 +78,7 @@ pub async fn find_consumer_by_id(
     operation_id = "update_consumer",
     tag = "Consumers",
     responses (
-        (status = 200, body = ResultBodyContainerConsumer)
+        (status = 200, body = Consumer)
     )
 )]
 pub async fn update_consumer(

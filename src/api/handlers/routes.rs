@@ -18,7 +18,7 @@ use crate::{
     operation_id = "create_route",
     tag = "Routes",
     responses (
-        (status = 201, body = ResultBodyContainerTarget)
+        (status = 201, body = Route)
     )
 )]
 pub async fn create_route(
@@ -46,7 +46,7 @@ pub async fn create_route(
     operation_id = "delete_route",
     tag = "Routes",
     responses (
-        (status = 200, body = ResultBodyContainerRoute)
+        (status = 200, body = Route)
     )
 )]
 pub async fn delete_route(
@@ -66,7 +66,7 @@ pub async fn delete_route(
     operation_id = "find_route_by_id",
     tag = "Routes",
     responses (
-        (status = 200, body = ResultBodyContainerRoute)
+        (status = 200, body = Route)
     )
 )]
 pub async fn find_route_by_id(
@@ -86,7 +86,7 @@ pub async fn find_route_by_id(
     operation_id = "update_route",
     tag = "Routes",
     responses (
-        (status = 200, body = ResultBodyContainerRoute)
+        (status = 200, body = Route)
     )
 )]
 pub async fn update_route(

@@ -34,6 +34,7 @@ pub async fn start_server(postgres_pool: Pool) {
             put(update_target),
         )
         .route("/upstreams", post(create_upstream))
+        .route("/upstreams", get(find_upstreams))
         .route("/upstreams/:id", get(find_upstream_by_id))
         .route("/upstreams/:id", delete(delete_upstream))
         .route("/upstreams/:id", put(update_upstream))

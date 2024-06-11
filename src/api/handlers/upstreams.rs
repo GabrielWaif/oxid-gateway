@@ -1,11 +1,15 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
 
 use crate::{
-    api::{errors::ResultErrors, AppState},
+    api::{
+        dtos::pagination::{self, PaginationQueryDto, PaginationResponseDto, UpstreamsPagination},
+        errors::ResultErrors,
+        AppState,
+    },
     database::{
         entities::upstreams::{NewUpstream, Upstream},
         repositories,
@@ -18,7 +22,7 @@ use crate::{
     operation_id = "create_upstream",
     tag = "Upstreams",
     responses (
-        (status = 201, body = ResultBodyContainerUpstream)
+        (status = 201, body = Upstream)
     )
 )]
 pub async fn create_upstream(
@@ -38,7 +42,7 @@ pub async fn create_upstream(
     operation_id = "delete_upstream",
     tag = "Upstreams",
     responses (
-        (status = 200, body = ResultBodyContainerUpstream)
+        (status = 200, body = Upstream)
     )
 )]
 pub async fn delete_upstream(
@@ -58,7 +62,7 @@ pub async fn delete_upstream(
     operation_id = "find_upstream_by_id",
     tag = "Upstreams",
     responses (
-        (status = 200, body = ResultBodyContainerUpstream)
+        (status = 200, body = Upstream)
     )
 )]
 pub async fn find_upstream_by_id(
@@ -73,12 +77,41 @@ pub async fn find_upstream_by_id(
 }
 
 #[utoipa::path(
+    get,
+    path = "/upstreams",
+    operation_id = "find_upstreams",
+    tag = "Upstreams",
+    params (
+        PaginationQueryDto
+    ),
+    responses (
+        (status = 200, body = UpstreamsPagination)
+    )
+)]
+pub async fn find_upstreams(
+    Path(id): Path<i32>,
+    State(app_state): State<AppState>,
+    pagination: Query<PaginationQueryDto>,
+) -> Result<Json<UpstreamsPagination>, ResultErrors> {
+    let pagination = pagination.0;
+    let response =
+        repositories::upstreams::find(&app_state.pool, pagination.offset, pagination.limit)
+            .await
+            .unwrap();
+
+    return Ok(Json(PaginationResponseDto {
+        items: response,
+        count: 0,
+    }));
+}
+
+#[utoipa::path(
     put,
     path = "/upstreams/{id}",
     operation_id = "update_upstream",
     tag = "Upstreams",
     responses (
-        (status = 200, body = ResultBodyContainerUpstream)
+        (status = 200, body = Upstream)
     )
 )]
 pub async fn update_upstream(

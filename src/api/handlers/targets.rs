@@ -18,7 +18,7 @@ use crate::{
     operation_id = "create_target",
     tag = "Targets",
     responses (
-        (status = 201, body = ResultBodyContainerTarget)
+        (status = 201, body = Target)
     )
 )]
 pub async fn create_target(
@@ -46,7 +46,7 @@ pub async fn create_target(
     operation_id = "delete_target",
     tag = "Targets",
     responses (
-        (status = 200, body = ResultBodyContainerTarget)
+        (status = 200, body = Target)
     )
 )]
 pub async fn delete_target(
@@ -66,7 +66,7 @@ pub async fn delete_target(
     operation_id = "find_target_by_id",
     tag = "Targets",
     responses (
-        (status = 200, body = ResultBodyContainerTarget)
+        (status = 200, body = Target)
     )
 )]
 pub async fn find_target_by_id(
@@ -86,7 +86,7 @@ pub async fn find_target_by_id(
     operation_id = "update_target",
     tag = "Targets",
     responses (
-        (status = 200, body = ResultBodyContainerTarget)
+        (status = 200, body = Target)
     )
 )]
 pub async fn update_target(
