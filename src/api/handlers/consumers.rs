@@ -1,11 +1,13 @@
 use axum::{
-    extract::{Path, Query, State},
-    http::StatusCode,
-    Json,
+    extract::{Path, Query, State}, http::StatusCode, response::IntoResponse, Json
 };
 
 use crate::{
-    api::{dtos::pagination::{ConsumersPagination, PaginationQueryDto, PaginationResponseDto}, errors::ResultErrors, AppState},
+    api::{
+        dtos::pagination::{ConsumersPagination, PaginationQueryDto, PaginationResponseDto},
+        errors::ResultErrors,
+        AppState,
+    },
     database::{
         entities::consumers::{Consumer, NewConsumer},
         repositories,
@@ -108,15 +110,22 @@ pub async fn update_consumer(
 pub async fn find_consumers(
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
-) -> Result<Json<ConsumersPagination>, ResultErrors> {
+) -> Result<Json<ConsumersPagination>, axum::response::Response> {
     let pagination = pagination.0;
-    let response =
-        repositories::consumers::find(&app_state.pool, pagination.offset, pagination.limit)
-            .await
-            .unwrap();
+
+    let response = match repositories::consumers::find_and_count(
+        &app_state.pool,
+        pagination.offset,
+        pagination.limit,
+    )
+    .await
+    {
+        Ok(response) => response,
+        Err(e) => return Err(ResultErrors::InfraError(e).into_response()),
+    };
 
     return Ok(Json(PaginationResponseDto {
-        items: response,
-        count: 0,
+        items: response.0,
+        count: response.1,
     }));
 }

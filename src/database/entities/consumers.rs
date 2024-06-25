@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(
-    Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema,
+    Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema, Debug
 )]
 #[diesel(table_name = crate::schema::consumers)]
 #[diesel(check_for_backend(diesel::pg::Pg))]

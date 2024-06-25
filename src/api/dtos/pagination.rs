@@ -14,7 +14,7 @@ use crate::database::entities::{
 )]
 pub struct PaginationResponseDto<T> {
     pub items: Vec<T>,
-    pub count: i32,
+    pub count: i64,
 }
 
 #[derive(ToSchema, Deserialize, IntoParams, Debug)]
