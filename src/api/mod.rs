@@ -3,13 +3,18 @@ pub mod dtos;
 pub mod errors;
 pub mod handlers;
 
+use std::fmt::Display;
+
 use axum::{
+    http::HeaderValue,
     routing::{delete, get, post, put},
     Router,
 };
 use deadpool_diesel::postgres::Pool;
 use docs::ApiDoc;
 use handlers::{consumers::*, routes::*, targets::*, upstreams::*};
+use tokio::net::ToSocketAddrs;
+use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -18,9 +23,12 @@ pub struct AppState {
     pub pool: Pool,
 }
 
-pub async fn start_server(postgres_pool: Pool) {
+pub async fn start_server<A>(address: A, postgres_pool: Pool) -> ()
+where
+    A: ToSocketAddrs + Display,
+{
     let app = Router::new()
-        .route("/upstreams/:upstream_id/targets", get(find_routes))
+        .route("/upstreams/:upstream_id/targets", get(find_targets))
         .route("/upstreams/:upstream_id/targets", post(create_target))
         .route(
             "/upstreams/:upstream_id/targets/targets/:id",
@@ -49,11 +57,15 @@ pub async fn start_server(postgres_pool: Pool) {
         .route("/consumers/:id", get(find_consumer_by_id))
         .route("/consumers/:id", delete(delete_consumer))
         .route("/consumers/:id", put(update_consumer))
+        .layer(CorsLayer::default().allow_origin("*".parse::<HeaderValue>().unwrap()))
         .merge(SwaggerUi::new("/swagger-ui").url("/swagger-json", ApiDoc::openapi()))
         .with_state(AppState {
             pool: postgres_pool,
         });
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind(&address).await.unwrap();
+
+    tracing::info!("Serving service connection to address: {address}");
+
     axum::serve(listener, app).await.unwrap();
 }

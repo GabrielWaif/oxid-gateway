@@ -17,7 +17,7 @@ pub struct PaginationResponseDto<T> {
     pub count: i32,
 }
 
-#[derive(ToSchema, Deserialize, IntoParams)]
+#[derive(ToSchema, Deserialize, IntoParams, Debug)]
 pub struct PaginationQueryDto {
     pub offset: i64,
     pub limit: i64,

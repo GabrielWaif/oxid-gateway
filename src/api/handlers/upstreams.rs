@@ -89,7 +89,6 @@ pub async fn find_upstream_by_id(
     )
 )]
 pub async fn find_upstreams(
-    Path(id): Path<i32>,
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<UpstreamsPagination>, ResultErrors> {

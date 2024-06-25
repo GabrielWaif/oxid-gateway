@@ -122,7 +122,7 @@ pub async fn update_target(
     )
 )]
 pub async fn find_targets(
-    Path((upstream_id, id)): Path<(i32, i32)>,
+    Path(upstream_id): Path<i32>,
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<TargetsPagination>, ResultErrors> {

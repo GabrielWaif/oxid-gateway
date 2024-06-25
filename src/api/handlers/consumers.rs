@@ -106,7 +106,6 @@ pub async fn update_consumer(
     )
 )]
 pub async fn find_consumers(
-    Path(id): Path<i32>,
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<ConsumersPagination>, ResultErrors> {

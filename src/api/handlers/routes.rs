@@ -129,7 +129,6 @@ pub async fn update_route(
     )
 )]
 pub async fn find_routes(
-    Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<RoutesPagination>, ResultErrors> {
