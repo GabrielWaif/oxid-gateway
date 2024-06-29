@@ -1,7 +1,7 @@
 -- Your SQL goes here
 CREATE TABLE upstreams (
   id SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL
+  name VARCHAR UNIQUE NOT NULL
 );
 
 CREATE TABLE targets (
