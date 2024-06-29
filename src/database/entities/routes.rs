@@ -4,17 +4,17 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(
-    Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema, Debug, Queryable
+    Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema,
 )]
 #[diesel(belongs_to(Upstream))]
 #[diesel(table_name = crate::schema::routes)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Route {
     pub id: i32,
-    pub upstream_id: i32,
     pub name: String,
     pub path: String,
     pub inner_path: String,
+    pub upstream_id: i32,
 }
 
 #[derive(Queryable, Insertable, Deserialize)]

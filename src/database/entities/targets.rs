@@ -3,11 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use utoipa::ToSchema;
 
-#[derive(
-    Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema,
-)]
-#[diesel(table_name = crate::schema::targets)]
+#[derive(Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema, Queryable)]
 #[diesel(belongs_to(Upstream))]
+#[diesel(table_name = crate::schema::targets)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Target {
     pub id: i32,

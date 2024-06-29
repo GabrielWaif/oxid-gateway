@@ -112,14 +112,20 @@ pub async fn find_and_count(
 
     let count_filter = pagination.text.clone();
 
-    // TODO: Filter by text
     let list = manager
         .interact(move |conn| {
-            routes::table
-                .select(Route::as_select())
-                .offset(pagination.offset)
-                .limit(pagination.limit)
-                .get_results(conn)
+            let mut query = routes::table.into_boxed();
+
+            match pagination.text {
+                Some(text) => {
+                    query = query.filter(routes::name.like(format!("%{text}%")));
+                }
+                None => {}
+            };
+
+            query = query.offset(pagination.offset).limit(pagination.limit);
+
+            query.load(conn)
         })
         .await
         .map_err(adapt_infra_error)
