@@ -1,9 +1,8 @@
 use deadpool_diesel::postgres::Pool;
 use diesel::prelude::*;
 
-use axum::http::StatusCode;
-
 use crate::{
+    api::dtos::pagination::PaginationQueryDto,
     database::{
         entities::targets::{NewTarget, Target},
         errors::{adapt_infra_error, InfraError},
@@ -15,7 +14,7 @@ use crate::{
 use diesel::ExpressionMethods;
 
 pub async fn create(pool: &Pool, body: NewTarget) -> Result<Target, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
@@ -35,7 +34,7 @@ pub async fn create(pool: &Pool, body: NewTarget) -> Result<Target, InfraError> 
 }
 
 pub async fn update(pool: &Pool, id: i32, body: NewTarget) -> Result<Target, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
@@ -60,7 +59,7 @@ pub async fn update(pool: &Pool, id: i32, body: NewTarget) -> Result<Target, Inf
 }
 
 pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Target, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
@@ -82,7 +81,7 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Target, InfraError> {
 }
 
 pub async fn delete(pool: &Pool, id: i32) -> Result<Target, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
@@ -103,19 +102,31 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Target, InfraError> {
     return Ok(res);
 }
 
-pub async fn find(pool: &Pool, offset: i64, limit: i64) -> Result<Vec<Target>, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+pub async fn find_and_count(
+    pool: &Pool,
+    pagination: PaginationQueryDto,
+) -> Result<(Vec<Target>, i64), InfraError> {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
 
-    let res = manager
+    let count_filter = pagination.text.clone();
+
+    let list = manager
         .interact(move |conn| {
-            targets::table
-                .select(Target::as_select())
-                .offset(offset)
-                .limit(limit)
-                .get_results(conn)
+            let mut query = targets::table.into_boxed();
+
+            match pagination.text {
+                Some(text) => {
+                    query = query.filter(targets::host.like(format!("%{text}%")));
+                }
+                None => {}
+            };
+
+            query = query.offset(pagination.offset).limit(pagination.limit);
+
+            query.load(conn)
         })
         .await
         .map_err(adapt_infra_error)
@@ -123,5 +134,24 @@ pub async fn find(pool: &Pool, offset: i64, limit: i64) -> Result<Vec<Target>, I
         .map_err(adapt_infra_error)
         .unwrap();
 
-    return Ok(res);
+    let count = manager
+        .interact(move |conn| {
+            let mut query = targets::table.into_boxed();
+
+            match count_filter {
+                Some(text) => {
+                    query = query.filter(targets::host.like(format!("%{text}%")));
+                }
+                None => {}
+            };
+
+            query.count().get_result(conn)
+        })
+        .await
+        .map_err(adapt_infra_error)
+        .unwrap()
+        .map_err(adapt_infra_error)
+        .unwrap();
+
+    return Ok((list, count));
 }

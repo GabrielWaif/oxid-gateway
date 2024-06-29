@@ -127,13 +127,15 @@ pub async fn find_targets(
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<TargetsPagination>, ResultErrors> {
     let pagination = pagination.0;
-    let response =
-        repositories::targets::find(&app_state.pool, pagination.offset, pagination.limit)
-            .await
-            .unwrap();
+
+    let response = match repositories::targets::find_and_count(&app_state.pool, pagination).await
+    {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(PaginationResponseDto {
-        items: response,
-        count: 0,
+        items: response.0,
+        count: response.1,
     }));
 }

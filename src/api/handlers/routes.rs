@@ -133,13 +133,15 @@ pub async fn find_routes(
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<RoutesPagination>, ResultErrors> {
     let pagination = pagination.0;
-    let response =
-        repositories::routes::find(&app_state.pool, pagination.offset, pagination.limit)
-            .await
-            .unwrap();
+
+    let response = match repositories::routes::find_and_count(&app_state.pool, pagination).await
+    {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(PaginationResponseDto {
-        items: response,
-        count: 0,
+        items: response.0,
+        count: response.1,
     }));
 }

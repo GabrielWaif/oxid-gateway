@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use utoipa::ToSchema;
 
-#[derive(Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema)]
+#[derive(
+    Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema, Debug, Queryable
+)]
 #[diesel(belongs_to(Upstream))]
 #[diesel(table_name = crate::schema::routes)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
