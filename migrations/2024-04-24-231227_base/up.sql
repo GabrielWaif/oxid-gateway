@@ -6,7 +6,6 @@ CREATE TABLE upstreams (
 
 CREATE TABLE targets (
   id SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
   host VARCHAR NOT NULL,
   port INTEGER NOT NULL,
   upstream_id INTEGER NOT NULL REFERENCES upstreams(id)
@@ -14,14 +13,14 @@ CREATE TABLE targets (
 
 CREATE TABLE routes (
   id SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
   path VARCHAR NOT NULL,
+  private BOOLEAN NOT NULL,
   inner_path VARCHAR NOT NULL,
   upstream_id INTEGER NOT NULL REFERENCES upstreams(id)
 );
 
 CREATE TABLE consumers (
   id SERIAL PRIMARY KEY,
-  username VARCHAR NOT NULL,
+  name VARCHAR NOT NULL,
   password VARCHAR NOT NULL
 )

@@ -44,8 +44,7 @@ pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer,
             diesel::update(consumers::dsl::consumers)
                 .filter(consumers::id.eq(id))
                 .set((
-                    consumers::username.eq(body.username),
-                    consumers::password.eq(body.password),
+                    consumers::name.eq(body.name),
                 ))
                 .returning(Consumer::as_returning())
                 .get_result(conn)
@@ -118,7 +117,7 @@ pub async fn find_and_count(
 
             match pagination.text {
                 Some(text) => {
-                    query = query.filter(consumers::username.like(format!("%{text}%")));
+                    query = query.filter(consumers::name.like(format!("%{text}%")));
                 }
                 None => {}
             };
@@ -139,7 +138,7 @@ pub async fn find_and_count(
 
             match count_filter {
                 Some(text) => {
-                    query = query.filter(consumers::username.like(format!("%{text}%")));
+                    query = query.filter(consumers::name.like(format!("%{text}%")));
                 }
                 None => {}
             };

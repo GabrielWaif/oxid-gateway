@@ -3,7 +3,7 @@
 diesel::table! {
     consumers (id) {
         id -> Int4,
-        username -> Varchar,
+        name -> Varchar,
         password -> Varchar,
     }
 }
@@ -11,8 +11,8 @@ diesel::table! {
 diesel::table! {
     routes (id) {
         id -> Int4,
-        name -> Varchar,
         path -> Varchar,
+        private -> Bool,
         inner_path -> Varchar,
         upstream_id -> Int4,
     }
@@ -21,7 +21,6 @@ diesel::table! {
 diesel::table! {
     targets (id) {
         id -> Int4,
-        name -> Varchar,
         host -> Varchar,
         port -> Int4,
         upstream_id -> Int4,

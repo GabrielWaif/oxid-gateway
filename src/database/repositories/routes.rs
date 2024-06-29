@@ -49,7 +49,6 @@ pub async fn update(
             diesel::update(routes::dsl::routes)
                 .filter(routes::id.eq(id).and(routes::upstream_id.eq(upstream_id)))
                 .set((
-                    routes::name.eq(body.name),
                     routes::path.eq(body.path),
                     routes::inner_path.eq(body.inner_path),
                 ))
@@ -127,7 +126,7 @@ pub async fn find_and_count(
 
             match pagination.text {
                 Some(text) => {
-                    query = query.filter(routes::name.like(format!("%{text}%")));
+                    query = query.filter(routes::path.like(format!("%{text}%")));
                 }
                 None => {}
             };
@@ -148,7 +147,7 @@ pub async fn find_and_count(
 
             match count_filter {
                 Some(text) => {
-                    query = query.filter(routes::name.like(format!("%{text}%")));
+                    query = query.filter(routes::path.like(format!("%{text}%")));
                 }
                 None => {}
             };

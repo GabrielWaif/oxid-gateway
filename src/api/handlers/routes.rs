@@ -34,8 +34,8 @@ pub async fn create_route(
     Json(body): Json<RouteFormDto>,
 ) -> Result<(StatusCode, Json<Route>), ResultErrors> {
     let new_route = NewRoute {
-        name: body.name,
         path: body.path,
+        private: body.private,
         inner_path: body.inner_path,
         upstream_id,
     };
@@ -105,7 +105,7 @@ pub async fn update_route(
     Json(body): Json<RouteFormDto>,
 ) -> Result<Json<Route>, ResultErrors> {
     let new_route = NewRoute {
-        name: body.name,
+        private: body.private,
         path: body.path,
         inner_path: body.inner_path,
         upstream_id,
