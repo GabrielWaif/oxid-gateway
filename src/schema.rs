@@ -9,18 +9,11 @@ diesel::table! {
 }
 
 diesel::table! {
-    consumersa (id) {
-        id -> Int4,
-        name -> Varchar,
-    }
-}
-
-diesel::table! {
     routes (id) {
         id -> Int4,
         path -> Varchar,
         private -> Bool,
-        inner_path -> Varchar,
+        inner_path -> Nullable<Varchar>,
         upstream_id -> Int4,
     }
 }
@@ -46,7 +39,6 @@ diesel::joinable!(targets -> upstreams (upstream_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     api_consumers,
-    consumersa,
     routes,
     targets,
     upstreams,

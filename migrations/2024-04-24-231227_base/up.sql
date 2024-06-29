@@ -13,14 +13,14 @@ CREATE TABLE targets (
 
 CREATE TABLE routes (
   id SERIAL PRIMARY KEY,
-  path VARCHAR NOT NULL,
+  path VARCHAR UNIQUE NOT NULL,
   private BOOLEAN NOT NULL,
-  inner_path VARCHAR NOT NULL,
+  inner_path VARCHAR,
   upstream_id INTEGER NOT NULL REFERENCES upstreams(id)
 );
 
 CREATE TABLE api_consumers (
   id SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
-  api_key VARCHAR NOT NULL
+  name VARCHAR UNIQUE NOT NULL,
+  api_key VARCHAR UNIQUE NOT NULL
 )

@@ -13,7 +13,7 @@ pub struct Route {
     pub id: i32,
     pub path: String,
     pub private: bool,
-    pub inner_path: String,
+    pub inner_path: Option<String>,
     pub upstream_id: i32,
 }
 
@@ -23,5 +23,5 @@ pub struct NewRoute {
     pub upstream_id: i32,
     pub path: String,
     pub private: bool,
-    pub inner_path: String,
+    pub inner_path: Option<String>,
 }

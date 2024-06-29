@@ -27,7 +27,9 @@ pub async fn create(pool: &Pool, body: NewRoute) -> Result<Route, InfraError> {
                 .get_result(conn)
         })
         .await
+        .map_err(adapt_infra_error)
         .unwrap()
+        .map_err(adapt_infra_error)
         .unwrap();
 
     return Ok(res);
@@ -56,7 +58,9 @@ pub async fn update(
                 .get_result(conn)
         })
         .await
+        .map_err(adapt_infra_error)
         .unwrap()
+        .map_err(adapt_infra_error)
         .unwrap();
 
     return Ok(res);
