@@ -21,4 +21,5 @@ pub struct PaginationResponseDto<T> {
 pub struct PaginationQueryDto {
     pub offset: i64,
     pub limit: i64,
+    pub text: Option<String>,
 }

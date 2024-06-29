@@ -1,5 +1,7 @@
 use axum::{
-    extract::{Path, Query, State}, http::StatusCode, response::IntoResponse, Json
+    extract::{Path, Query, State},
+    http::StatusCode,
+    Json,
 };
 
 use crate::{
@@ -113,12 +115,7 @@ pub async fn find_consumers(
 ) -> Result<Json<ConsumersPagination>, ResultErrors> {
     let pagination = pagination.0;
 
-    let response = match repositories::consumers::find_and_count(
-        &app_state.pool,
-        pagination.offset,
-        pagination.limit,
-    )
-    .await
+    let response = match repositories::consumers::find_and_count(&app_state.pool, pagination).await
     {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
