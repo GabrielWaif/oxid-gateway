@@ -8,6 +8,7 @@ pub type Result<T> = std::result::Result<T, InfraError>;
 pub enum InfraError {
     InternalServerError,
     NotFound,
+    DatabaseConflict,
 }
 
 pub fn adapt_infra_error<T: AsInfraError>(error: T) -> InfraError {
@@ -19,6 +20,7 @@ impl fmt::Display for InfraError {
         match self {
             InfraError::NotFound => write!(f, "Not found"),
             InfraError::InternalServerError => write!(f, "Internal server error"),
+            InfraError::DatabaseConflict => write!(f, "Conflict"),
         }
     }
 }
@@ -31,6 +33,16 @@ impl AsInfraError for diesel::result::Error {
     fn as_infra_error(&self) -> InfraError {
         match self {
             diesel::result::Error::NotFound => InfraError::NotFound,
+            diesel::result::Error::DatabaseError(database_error, _message) => {
+                match database_error {
+                    diesel::result::DatabaseErrorKind::NotNullViolation
+                    | diesel::result::DatabaseErrorKind::UniqueViolation
+                    | diesel::result::DatabaseErrorKind::ForeignKeyViolation => {
+                        InfraError::DatabaseConflict
+                    }
+                    _ => InfraError::InternalServerError,
+                }
+            }
             _ => InfraError::InternalServerError,
         }
     }

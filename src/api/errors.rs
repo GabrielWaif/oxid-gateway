@@ -7,6 +7,7 @@ use crate::database::errors::InfraError;
 pub enum ResultErrors {
     InternalServerError,
     NotFound,
+    Conflict,
     InfraError(InfraError),
 }
 
@@ -20,6 +21,10 @@ impl IntoResponse for ResultErrors {
             Self::InfraError(db_error) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Internal server error: {}", db_error),
+            ),
+            Self::Conflict => (
+                StatusCode::CONFLICT,
+                String::from("Conflict"),
             ),
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -36,6 +41,7 @@ impl From<InfraError> for ResultErrors {
         match value {
             InfraError::InternalServerError => Self::InfraError(value),
             InfraError::NotFound => Self::NotFound,
+            InfraError::DatabaseConflict => Self::Conflict,
         }
     }
 }
