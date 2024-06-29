@@ -8,10 +8,8 @@ use crate::{
         errors::{adapt_infra_error, InfraError},
         get_pool_connection,
     },
-    schema::consumers,
+    schema::api_consumers,
 };
-
-use diesel::ExpressionMethods;
 
 pub async fn create(pool: &Pool, body: NewConsumer) -> Result<Consumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
@@ -21,7 +19,7 @@ pub async fn create(pool: &Pool, body: NewConsumer) -> Result<Consumer, InfraErr
 
     let res = manager
         .interact(move |conn| {
-            diesel::insert_into(consumers::table)
+            diesel::insert_into(api_consumers::table)
                 .values(body)
                 .returning(Consumer::as_returning())
                 .get_result(conn)
@@ -41,10 +39,10 @@ pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer,
 
     let res = manager
         .interact(move |conn| {
-            diesel::update(consumers::dsl::consumers)
-                .filter(consumers::id.eq(id))
+            diesel::update(api_consumers::dsl::api_consumers)
+                .filter(api_consumers::id.eq(id))
                 .set((
-                    consumers::name.eq(body.name),
+                    api_consumers::name.eq(body.name),
                 ))
                 .returning(Consumer::as_returning())
                 .get_result(conn)
@@ -64,8 +62,8 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
 
     let res = manager
         .interact(move |conn| {
-            consumers::table
-                .filter(consumers::id.eq(id))
+            api_consumers::table
+                .filter(api_consumers::id.eq(id))
                 .select(Consumer::as_select())
                 .get_result(conn)
         })
@@ -86,8 +84,8 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
 
     let res = manager
         .interact(move |conn| {
-            diesel::delete(consumers::dsl::consumers)
-                .filter(consumers::id.eq(id))
+            diesel::delete(api_consumers::dsl::api_consumers)
+                .filter(api_consumers::id.eq(id))
                 .returning(Consumer::as_returning())
                 .get_result(conn)
         })
@@ -113,11 +111,11 @@ pub async fn find_and_count(
 
     let list = manager
         .interact(move |conn| {
-            let mut query = consumers::table.into_boxed();
+            let mut query = api_consumers::table.into_boxed();
 
             match pagination.text {
                 Some(text) => {
-                    query = query.filter(consumers::name.like(format!("%{text}%")));
+                    query = query.filter(api_consumers::name.like(format!("%{text}%")));
                 }
                 None => {}
             };
@@ -134,11 +132,11 @@ pub async fn find_and_count(
 
     let count = manager
         .interact(move |conn| {
-            let mut query = consumers::table.into_boxed();
+            let mut query = api_consumers::table.into_boxed();
 
             match count_filter {
                 Some(text) => {
-                    query = query.filter(consumers::name.like(format!("%{text}%")));
+                    query = query.filter(api_consumers::name.like(format!("%{text}%")));
                 }
                 None => {}
             };

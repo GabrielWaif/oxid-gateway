@@ -1,10 +1,17 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    consumers (id) {
+    api_consumers (id) {
         id -> Int4,
         name -> Varchar,
-        password -> Varchar,
+        api_key -> Varchar,
+    }
+}
+
+diesel::table! {
+    consumersa (id) {
+        id -> Int4,
+        name -> Varchar,
     }
 }
 
@@ -38,7 +45,8 @@ diesel::joinable!(routes -> upstreams (upstream_id));
 diesel::joinable!(targets -> upstreams (upstream_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    consumers,
+    api_consumers,
+    consumersa,
     routes,
     targets,
     upstreams,

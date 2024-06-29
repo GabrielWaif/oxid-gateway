@@ -19,8 +19,8 @@ CREATE TABLE routes (
   upstream_id INTEGER NOT NULL REFERENCES upstreams(id)
 );
 
-CREATE TABLE consumers (
+CREATE TABLE api_consumers (
   id SERIAL PRIMARY KEY,
   name VARCHAR NOT NULL,
-  password VARCHAR NOT NULL
+  api_key VARCHAR NOT NULL
 )

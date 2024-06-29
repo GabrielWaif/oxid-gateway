@@ -2,4 +2,4 @@
 DROP TABLE routes;
 DROP TABLE targets;
 DROP TABLE upstreams;
-DROP TABLE consumers;
+DROP TABLE api_consumers;
