@@ -25,7 +25,7 @@ async fn main() {
         .await
         .unwrap();
 
-    let connection = get_pool_connection(&pool).await;
+    let connection = get_pool_connection(&pool).await.unwrap();
 
     tracing::info!("Connected to connection pool");
 

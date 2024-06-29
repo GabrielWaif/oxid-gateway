@@ -1,4 +1,3 @@
-use axum::http::StatusCode;
 use deadpool_diesel::postgres::Pool;
 use diesel::prelude::*;
 
@@ -14,7 +13,10 @@ use crate::{
 use diesel::ExpressionMethods;
 
 pub async fn create(pool: &Pool, body: NewConsumer) -> Result<Consumer, InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {
@@ -31,7 +33,10 @@ pub async fn create(pool: &Pool, body: NewConsumer) -> Result<Consumer, InfraErr
 }
 
 pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer, InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {
@@ -52,7 +57,10 @@ pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer,
 }
 
 pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {
@@ -70,8 +78,11 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
     return Ok(res);
 }
 
-pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, (StatusCode, String)> {
-    let manager = get_pool_connection(pool).await;
+pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {
@@ -90,7 +101,10 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, (StatusCode, Strin
 }
 
 pub async fn find_and_count(pool: &Pool, offset: i64, limit: i64) -> Result<(Vec<Consumer>, i64), InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {

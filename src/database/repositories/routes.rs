@@ -15,7 +15,11 @@ use crate::{
 use diesel::ExpressionMethods;
 
 pub async fn create(pool: &Pool, body: NewRoute) -> Result<Route, InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
+
 
     let res = manager
         .interact(move |conn| {
@@ -32,7 +36,10 @@ pub async fn create(pool: &Pool, body: NewRoute) -> Result<Route, InfraError> {
 }
 
 pub async fn update(pool: &Pool, id: i32, body: NewRoute) -> Result<Route, InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {
@@ -54,7 +61,10 @@ pub async fn update(pool: &Pool, id: i32, body: NewRoute) -> Result<Route, Infra
 }
 
 pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Route, InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {
@@ -72,8 +82,11 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Route, InfraError> {
     return Ok(res);
 }
 
-pub async fn delete(pool: &Pool, id: i32) -> Result<Route, (StatusCode, String)> {
-    let manager = get_pool_connection(pool).await;
+pub async fn delete(pool: &Pool, id: i32) -> Result<Route, InfraError> {
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {
@@ -92,7 +105,10 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Route, (StatusCode, String)>
 }
 
 pub async fn find(pool: &Pool, offset: i64, limit: i64) -> Result<Vec<Route>, InfraError> {
-    let manager = get_pool_connection(pool).await;
+    let manager =  match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
 
     let res = manager
         .interact(move |conn| {

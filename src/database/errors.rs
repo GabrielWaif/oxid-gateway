@@ -2,13 +2,15 @@ use std::fmt;
 
 use deadpool_diesel::InteractError;
 
+pub type Result<T> = std::result::Result<T, InfraError>;
+
 #[derive(Debug)]
 pub enum InfraError {
     InternalServerError,
     NotFound,
 }
 
-pub fn adapt_infra_error<T: Error>(error: T) -> InfraError {
+pub fn adapt_infra_error<T: AsInfraError>(error: T) -> InfraError {
     error.as_infra_error()
 }
 
@@ -21,13 +23,12 @@ impl fmt::Display for InfraError {
     }
 }
 
-pub trait Error {
+pub trait AsInfraError {
     fn as_infra_error(&self) -> InfraError;
 }
 
-impl Error for diesel::result::Error {
+impl AsInfraError for diesel::result::Error {
     fn as_infra_error(&self) -> InfraError {
-        println!("{:?}", self);
         match self {
             diesel::result::Error::NotFound => InfraError::NotFound,
             _ => InfraError::InternalServerError,
@@ -35,13 +36,13 @@ impl Error for diesel::result::Error {
     }
 }
 
-impl Error for deadpool_diesel::PoolError {
+impl AsInfraError for deadpool_diesel::PoolError {
     fn as_infra_error(&self) -> InfraError {
         InfraError::InternalServerError
     }
 }
 
-impl Error for InteractError {
+impl AsInfraError for InteractError {
     fn as_infra_error(&self) -> InfraError {
         InfraError::InternalServerError
     }

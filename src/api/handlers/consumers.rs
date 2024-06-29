@@ -110,7 +110,7 @@ pub async fn update_consumer(
 pub async fn find_consumers(
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
-) -> Result<Json<ConsumersPagination>, axum::response::Response> {
+) -> Result<Json<ConsumersPagination>, ResultErrors> {
     let pagination = pagination.0;
 
     let response = match repositories::consumers::find_and_count(
@@ -121,7 +121,7 @@ pub async fn find_consumers(
     .await
     {
         Ok(response) => response,
-        Err(e) => return Err(ResultErrors::InfraError(e).into_response()),
+        Err(e) => return Err(e.into()),
     };
 
     return Ok(Json(PaginationResponseDto {
