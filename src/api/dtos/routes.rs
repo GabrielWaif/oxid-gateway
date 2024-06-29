@@ -3,7 +3,7 @@ use utoipa::ToSchema;
 
 #[derive(ToSchema, Deserialize)]
 pub struct RouteFormDto {
-    pub name: String,
     pub path: String,
+    pub private: bool,
     pub inner_path: String,
 }

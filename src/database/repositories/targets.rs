@@ -8,7 +8,7 @@ use crate::{
         errors::{adapt_infra_error, InfraError},
         get_pool_connection,
     },
-    schema::targets::{self, host, name},
+    schema::targets::{self, host},
 };
 
 use diesel::ExpressionMethods;
@@ -48,11 +48,7 @@ pub async fn update(
         .interact(move |conn| {
             diesel::update(targets::dsl::targets)
                 .filter(targets::id.eq(id).and(targets::upstream_id.eq(upstream_id)))
-                .set((
-                    name.eq(body.name),
-                    host.eq(body.host),
-                    targets::port.eq(body.port),
-                ))
+                .set((host.eq(body.host), targets::port.eq(body.port)))
                 .returning(Target::as_returning())
                 .get_result(conn)
         })

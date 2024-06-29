@@ -21,9 +21,7 @@ async fn main() {
 
     tracing::info!("Starting Logger");
 
-    let pool = get_postgres_pool()
-        .await
-        .unwrap();
+    let pool = get_postgres_pool().await.unwrap();
 
     let connection = get_pool_connection(&pool).await.unwrap();
 

@@ -34,8 +34,8 @@ pub async fn create_route(
     Json(body): Json<RouteFormDto>,
 ) -> Result<(StatusCode, Json<Route>), ResultErrors> {
     let new_route = NewRoute {
-        name: body.name,
         path: body.path,
+        private: body.private,
         inner_path: body.inner_path,
         upstream_id,
     };
@@ -105,8 +105,8 @@ pub async fn update_route(
     Json(body): Json<RouteFormDto>,
 ) -> Result<Json<Route>, ResultErrors> {
     let new_route = NewRoute {
-        name: body.name,
         path: body.path,
+        private: body.private,
         inner_path: body.inner_path,
         upstream_id,
     };
@@ -139,7 +139,13 @@ pub async fn find_routes(
 ) -> Result<Json<RoutesPagination>, ResultErrors> {
     let pagination = pagination.0;
 
-    let response = match repositories::routes::find_and_count(&app_state.pool, upstream_id, pagination).await {
+    let response = match repositories::routes::find_and_count(
+        &app_state.pool,
+        upstream_id,
+        pagination,
+    )
+    .await
+    {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };

@@ -6,12 +6,15 @@ use axum::{
 
 use crate::{
     api::{
-        dtos::pagination::{ConsumersPagination, PaginationQueryDto, PaginationResponseDto},
+        dtos::{
+            consumers::ConsumerFormDto,
+            pagination::{ConsumersPagination, PaginationQueryDto, PaginationResponseDto},
+        },
         errors::ResultErrors,
         AppState,
     },
     database::{
-        entities::consumers::{Consumer, NewConsumer},
+        entities::consumers::{Consumer, NewConsumer, UpdateConsumer},
         repositories,
     },
 };
@@ -27,9 +30,14 @@ use crate::{
 )]
 pub async fn create_consumer(
     State(app_state): State<AppState>,
-    Json(body): Json<NewConsumer>,
+    Json(body): Json<ConsumerFormDto>,
 ) -> Result<(StatusCode, Json<Consumer>), ResultErrors> {
-    let response = match repositories::consumers::create(&app_state.pool, body).await {
+    let new_consumer = NewConsumer {
+        name: body.name,
+        api_key: String::from("teste"),
+    };
+
+    let response = match repositories::consumers::create(&app_state.pool, new_consumer).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };
@@ -93,7 +101,11 @@ pub async fn update_consumer(
     State(app_state): State<AppState>,
     Json(body): Json<NewConsumer>,
 ) -> Result<Json<Consumer>, ResultErrors> {
-    let response = match repositories::consumers::update(&app_state.pool, id, body).await {
+    let new_consumer = UpdateConsumer {
+        name: body.name,
+    };
+
+    let response = match repositories::consumers::update(&app_state.pool, id, new_consumer).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };

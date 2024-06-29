@@ -11,8 +11,8 @@ use utoipa::ToSchema;
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Route {
     pub id: i32,
-    pub name: String,
     pub path: String,
+    pub private: bool,
     pub inner_path: String,
     pub upstream_id: i32,
 }
@@ -20,8 +20,8 @@ pub struct Route {
 #[derive(Queryable, Insertable, Deserialize)]
 #[diesel(table_name = crate::schema::routes)]
 pub struct NewRoute {
-    pub upstream_id: i32,
-    pub name: String,
     pub path: String,
+    pub private: bool,
     pub inner_path: String,
+    pub upstream_id: i32,
 }

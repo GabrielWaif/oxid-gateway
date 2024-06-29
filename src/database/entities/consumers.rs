@@ -4,19 +4,25 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 #[derive(
-    Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema, Debug
+    Queryable, Selectable, Serialize, Identifiable, AsChangeset, PartialEq, Clone, ToSchema, Debug,
 )]
 #[diesel(table_name = crate::schema::consumers)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Consumer {
     pub id: i32,
-    pub username: String,
-    pub password: String,
+    pub name: String,
+    pub api_key: String,
 }
 
-#[derive(Queryable, Insertable, Deserialize, ToSchema)]
+#[derive(Queryable, Insertable, Deserialize)]
 #[diesel(table_name = crate::schema::consumers)]
 pub struct NewConsumer {
-    pub username: String,
-    pub password: String,
+    pub name: String,
+    pub api_key: String,
+}
+
+#[derive(Queryable, Insertable, Deserialize)]
+#[diesel(table_name = crate::schema::consumers)]
+pub struct UpdateConsumer {
+    pub name: String,
 }

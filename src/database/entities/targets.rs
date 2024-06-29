@@ -9,7 +9,6 @@ use utoipa::ToSchema;
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Target {
     pub id: i32,
-    pub name: String,
     pub host: String,
     pub port: i32,
     pub upstream_id: i32,
@@ -18,7 +17,6 @@ pub struct Target {
 #[derive(Queryable, Insertable, Deserialize, Serialize, ToSchema)]
 #[diesel(table_name = crate::schema::targets)]
 pub struct NewTarget {
-    pub name: String,
     pub host: String,
     pub port: i32,
     pub upstream_id: i32,

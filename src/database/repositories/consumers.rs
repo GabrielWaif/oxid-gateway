@@ -4,7 +4,7 @@ use diesel::prelude::*;
 use crate::{
     api::dtos::pagination::PaginationQueryDto,
     database::{
-        entities::consumers::{Consumer, NewConsumer},
+        entities::consumers::{Consumer, NewConsumer, UpdateConsumer},
         errors::{adapt_infra_error, InfraError},
         get_pool_connection,
     },
@@ -33,7 +33,7 @@ pub async fn create(pool: &Pool, body: NewConsumer) -> Result<Consumer, InfraErr
     return Ok(res);
 }
 
-pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer, InfraError> {
+pub async fn update(pool: &Pool, id: i32, body: UpdateConsumer) -> Result<Consumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -44,8 +44,7 @@ pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer,
             diesel::update(consumers::dsl::consumers)
                 .filter(consumers::id.eq(id))
                 .set((
-                    consumers::username.eq(body.username),
-                    consumers::password.eq(body.password),
+                    consumers::name.eq(body.username),
                 ))
                 .returning(Consumer::as_returning())
                 .get_result(conn)
@@ -118,7 +117,7 @@ pub async fn find_and_count(
 
             match pagination.text {
                 Some(text) => {
-                    query = query.filter(consumers::username.like(format!("%{text}%")));
+                    query = query.filter(consumers::name.like(format!("%{text}%")));
                 }
                 None => {}
             };
@@ -139,7 +138,7 @@ pub async fn find_and_count(
 
             match count_filter {
                 Some(text) => {
-                    query = query.filter(consumers::username.like(format!("%{text}%")));
+                    query = query.filter(consumers::name.like(format!("%{text}%")));
                 }
                 None => {}
             };

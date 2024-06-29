@@ -34,7 +34,6 @@ pub async fn create_target(
     Json(body): Json<TargetFormDto>,
 ) -> Result<(StatusCode, Json<Target>), ResultErrors> {
     let new_target = NewTarget {
-        name: body.name,
         host: body.host,
         port: body.port,
         upstream_id,
@@ -105,7 +104,6 @@ pub async fn update_target(
     Json(body): Json<TargetFormDto>,
 ) -> Result<Json<Target>, ResultErrors> {
     let new_target = NewTarget {
-        name: body.name,
         host: body.host,
         port: body.port,
         upstream_id,
