@@ -132,7 +132,9 @@ pub async fn find_and_count(
     match extract_interact_error(
         manager
             .interact(move |conn| {
-                let mut query = targets::table.into_boxed();
+                let mut query = targets::table
+                    .into_boxed()
+                    .filter(targets::upstream_id.eq(upstream_id));
 
                 match count_filter {
                     Some(text) => {

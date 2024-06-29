@@ -123,6 +123,36 @@ pub async fn update_route(
 #[utoipa::path(
     get,
     path = "/upstreams/{upstream_id}/routes",
+    operation_id = "find_routes_in_upstream",
+    tag = "Routes",
+    params (
+        PaginationQueryDto
+    ),
+    responses (
+        (status = 200, body = RoutesPagination)
+    )
+)]
+pub async fn find_routes_in_upstream(
+    Path(upstream_id): Path<i32>,
+    State(app_state): State<AppState>,
+    pagination: Query<PaginationQueryDto>,
+) -> Result<Json<RoutesPagination>, ResultErrors> {
+    let pagination = pagination.0;
+
+    let response = match repositories::routes::find_and_count_in_upstream(&app_state.pool, upstream_id, pagination).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
+
+    return Ok(Json(PaginationResponseDto {
+        items: response.0,
+        count: response.1,
+    }));
+}
+
+#[utoipa::path(
+    get,
+    path = "/routes",
     operation_id = "find_routes",
     tag = "Routes",
     params (
@@ -133,13 +163,12 @@ pub async fn update_route(
     )
 )]
 pub async fn find_routes(
-    Path(upstream_id): Path<i32>,
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<RoutesPagination>, ResultErrors> {
     let pagination = pagination.0;
 
-    let response = match repositories::routes::find_and_count(&app_state.pool, upstream_id, pagination).await {
+    let response = match repositories::routes::find_and_count(&app_state.pool, pagination).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };

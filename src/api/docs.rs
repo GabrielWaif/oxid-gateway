@@ -32,6 +32,7 @@ use super::dtos::{
         crate::api::handlers::upstreams::find_upstreams,
         crate::api::handlers::upstreams::update_upstream,
         crate::api::handlers::routes::find_routes,
+        crate::api::handlers::routes::find_routes_in_upstream,
         crate::api::handlers::routes::create_route,
         crate::api::handlers::routes::delete_route,
         crate::api::handlers::routes::find_route_by_id,
