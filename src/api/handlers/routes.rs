@@ -61,7 +61,7 @@ pub async fn delete_route(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Route>, ResultErrors> {
-    let response = match repositories::routes::delete(&app_state.pool, id).await {
+    let response = match repositories::routes::delete(&app_state.pool, id, upstream_id).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };
@@ -82,7 +82,7 @@ pub async fn find_route_by_id(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Route>, ResultErrors> {
-    let response = match repositories::routes::find_by_id(&app_state.pool, id).await {
+    let response = match repositories::routes::find_by_id(&app_state.pool, id, upstream_id).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };
@@ -104,7 +104,6 @@ pub async fn update_route(
     State(app_state): State<AppState>,
     Json(body): Json<RouteFormDto>,
 ) -> Result<Json<Route>, ResultErrors> {
-    // TODO: Check if target is part of upstream first
     let new_route = NewRoute {
         name: body.name,
         path: body.path,
@@ -112,10 +111,11 @@ pub async fn update_route(
         upstream_id,
     };
 
-    let response = match repositories::routes::update(&app_state.pool, id, new_route).await {
-        Ok(response) => response,
-        Err(e) => return Err(e.into()),
-    };
+    let response =
+        match repositories::routes::update(&app_state.pool, id, upstream_id, new_route).await {
+            Ok(response) => response,
+            Err(e) => return Err(e.into()),
+        };
 
     return Ok(Json(response));
 }
@@ -133,12 +133,13 @@ pub async fn update_route(
     )
 )]
 pub async fn find_routes(
+    Path(upstream_id): Path<i32>,
     State(app_state): State<AppState>,
     pagination: Query<PaginationQueryDto>,
 ) -> Result<Json<RoutesPagination>, ResultErrors> {
     let pagination = pagination.0;
 
-    let response = match repositories::routes::find_and_count(&app_state.pool, pagination).await {
+    let response = match repositories::routes::find_and_count(&app_state.pool, upstream_id, pagination).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };

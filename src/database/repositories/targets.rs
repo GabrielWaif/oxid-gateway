@@ -33,7 +33,12 @@ pub async fn create(pool: &Pool, body: NewTarget) -> Result<Target, InfraError> 
     return Ok(res);
 }
 
-pub async fn update(pool: &Pool, id: i32, body: NewTarget) -> Result<Target, InfraError> {
+pub async fn update(
+    pool: &Pool,
+    id: i32,
+    upstream_id: i32,
+    body: NewTarget,
+) -> Result<Target, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -42,7 +47,7 @@ pub async fn update(pool: &Pool, id: i32, body: NewTarget) -> Result<Target, Inf
     let res = manager
         .interact(move |conn| {
             diesel::update(targets::dsl::targets)
-                .filter(targets::id.eq(id))
+                .filter(targets::id.eq(id).and(targets::upstream_id.eq(upstream_id)))
                 .set((
                     name.eq(body.name),
                     host.eq(body.host),
@@ -58,7 +63,7 @@ pub async fn update(pool: &Pool, id: i32, body: NewTarget) -> Result<Target, Inf
     return Ok(res);
 }
 
-pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Target, InfraError> {
+pub async fn find_by_id(pool: &Pool, id: i32, upstream_id: i32) -> Result<Target, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -67,7 +72,7 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Target, InfraError> {
     let res = manager
         .interact(move |conn| {
             targets::table
-                .filter(targets::id.eq(id))
+                .filter(targets::id.eq(id).and(targets::upstream_id.eq(upstream_id)))
                 .select(Target::as_select())
                 .get_result(conn)
         })
@@ -80,7 +85,7 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Target, InfraError> {
     return Ok(res);
 }
 
-pub async fn delete(pool: &Pool, id: i32) -> Result<Target, InfraError> {
+pub async fn delete(pool: &Pool, id: i32, upstream_id: i32) -> Result<Target, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -89,7 +94,7 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Target, InfraError> {
     let res = manager
         .interact(move |conn| {
             diesel::delete(targets::dsl::targets)
-                .filter(targets::id.eq(id))
+                .filter(targets::id.eq(id).and(targets::upstream_id.eq(upstream_id)))
                 .returning(Target::as_returning())
                 .get_result(conn)
         })
@@ -104,6 +109,7 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Target, InfraError> {
 
 pub async fn find_and_count(
     pool: &Pool,
+    upstream_id: i32,
     pagination: PaginationQueryDto,
 ) -> Result<(Vec<Target>, i64), InfraError> {
     let manager = match get_pool_connection(pool).await {
@@ -115,7 +121,9 @@ pub async fn find_and_count(
 
     let list = manager
         .interact(move |conn| {
-            let mut query = targets::table.into_boxed();
+            let mut query = targets::table
+                .into_boxed()
+                .filter(targets::upstream_id.eq(upstream_id));
 
             match pagination.text {
                 Some(text) => {

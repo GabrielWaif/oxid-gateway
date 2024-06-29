@@ -61,7 +61,7 @@ pub async fn delete_target(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Target>, ResultErrors> {
-    let response = match repositories::targets::delete(&app_state.pool, id).await {
+    let response = match repositories::targets::delete(&app_state.pool, id, upstream_id).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };
@@ -82,7 +82,7 @@ pub async fn find_target_by_id(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Target>, ResultErrors> {
-    let response = match repositories::targets::find_by_id(&app_state.pool, id).await {
+    let response = match repositories::targets::find_by_id(&app_state.pool, id, upstream_id).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };
@@ -104,7 +104,6 @@ pub async fn update_target(
     State(app_state): State<AppState>,
     Json(body): Json<TargetFormDto>,
 ) -> Result<Json<Target>, ResultErrors> {
-    // TODO: Check if target is part of upstream first
     let new_target = NewTarget {
         name: body.name,
         host: body.host,
@@ -112,10 +111,11 @@ pub async fn update_target(
         upstream_id,
     };
 
-    let response = match repositories::targets::update(&app_state.pool, id, new_target).await {
-        Ok(response) => response,
-        Err(e) => return Err(e.into()),
-    };
+    let response =
+        match repositories::targets::update(&app_state.pool, id, upstream_id, new_target).await {
+            Ok(response) => response,
+            Err(e) => return Err(e.into()),
+        };
 
     return Ok(Json(response));
 }
@@ -139,10 +139,12 @@ pub async fn find_targets(
 ) -> Result<Json<TargetsPagination>, ResultErrors> {
     let pagination = pagination.0;
 
-    let response = match repositories::targets::find_and_count(&app_state.pool, pagination).await {
-        Ok(response) => response,
-        Err(e) => return Err(e.into()),
-    };
+    let response =
+        match repositories::targets::find_and_count(&app_state.pool, upstream_id, pagination).await
+        {
+            Ok(response) => response,
+            Err(e) => return Err(e.into()),
+        };
 
     return Ok(Json(PaginationResponseDto {
         items: response.0,

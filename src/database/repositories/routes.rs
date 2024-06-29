@@ -2,21 +2,22 @@ use deadpool_diesel::postgres::Pool;
 use diesel::prelude::*;
 
 use crate::{
-    api::dtos::pagination::PaginationQueryDto, database::{
+    api::dtos::pagination::PaginationQueryDto,
+    database::{
         entities::routes::{NewRoute, Route},
         errors::{adapt_infra_error, InfraError},
         get_pool_connection,
-    }, schema::routes
+    },
+    schema::routes,
 };
 
 use diesel::ExpressionMethods;
 
 pub async fn create(pool: &Pool, body: NewRoute) -> Result<Route, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
-
 
     let res = manager
         .interact(move |conn| {
@@ -32,8 +33,13 @@ pub async fn create(pool: &Pool, body: NewRoute) -> Result<Route, InfraError> {
     return Ok(res);
 }
 
-pub async fn update(pool: &Pool, id: i32, body: NewRoute) -> Result<Route, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+pub async fn update(
+    pool: &Pool,
+    id: i32,
+    upstream_id: i32,
+    body: NewRoute,
+) -> Result<Route, InfraError> {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
@@ -41,7 +47,7 @@ pub async fn update(pool: &Pool, id: i32, body: NewRoute) -> Result<Route, Infra
     let res = manager
         .interact(move |conn| {
             diesel::update(routes::dsl::routes)
-                .filter(routes::id.eq(id))
+                .filter(routes::id.eq(id).and(routes::upstream_id.eq(upstream_id)))
                 .set((
                     routes::name.eq(body.name),
                     routes::path.eq(body.path),
@@ -57,8 +63,8 @@ pub async fn update(pool: &Pool, id: i32, body: NewRoute) -> Result<Route, Infra
     return Ok(res);
 }
 
-pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Route, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+pub async fn find_by_id(pool: &Pool, id: i32, upstream_id: i32) -> Result<Route, InfraError> {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
@@ -66,7 +72,7 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Route, InfraError> {
     let res = manager
         .interact(move |conn| {
             routes::table
-                .filter(routes::id.eq(id))
+                .filter(routes::id.eq(id).and(routes::upstream_id.eq(upstream_id)))
                 .select(Route::as_select())
                 .get_result(conn)
         })
@@ -79,8 +85,8 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Route, InfraError> {
     return Ok(res);
 }
 
-pub async fn delete(pool: &Pool, id: i32) -> Result<Route, InfraError> {
-    let manager =  match get_pool_connection(pool).await {
+pub async fn delete(pool: &Pool, id: i32, upstream_id: i32) -> Result<Route, InfraError> {
+    let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
     };
@@ -88,7 +94,7 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Route, InfraError> {
     let res = manager
         .interact(move |conn| {
             diesel::delete(routes::dsl::routes)
-                .filter(routes::id.eq(id))
+                .filter(routes::id.eq(id).and(routes::upstream_id.eq(upstream_id)))
                 .returning(Route::as_returning())
                 .get_result(conn)
         })
@@ -103,6 +109,7 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Route, InfraError> {
 
 pub async fn find_and_count(
     pool: &Pool,
+    upstream_id: i32,
     pagination: PaginationQueryDto,
 ) -> Result<(Vec<Route>, i64), InfraError> {
     let manager = match get_pool_connection(pool).await {
@@ -114,7 +121,9 @@ pub async fn find_and_count(
 
     let list = manager
         .interact(move |conn| {
-            let mut query = routes::table.into_boxed();
+            let mut query = routes::table
+                .into_boxed()
+                .filter(routes::upstream_id.eq(upstream_id));
 
             match pagination.text {
                 Some(text) => {

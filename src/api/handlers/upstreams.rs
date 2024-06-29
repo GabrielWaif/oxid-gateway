@@ -6,7 +6,7 @@ use axum::{
 
 use crate::{
     api::{
-        dtos::pagination::{self, PaginationQueryDto, PaginationResponseDto, UpstreamsPagination},
+        dtos::pagination::{PaginationQueryDto, PaginationResponseDto, UpstreamsPagination},
         errors::ResultErrors,
         AppState,
     },
