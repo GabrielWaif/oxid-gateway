@@ -5,7 +5,14 @@ use axum::{
 };
 
 use crate::{
-    api::{dtos::{pagination::{PaginationQueryDto, PaginationResponseDto, TargetsPagination}, targets::TargetFormDto}, errors::ResultErrors, AppState},
+    api::{
+        dtos::{
+            pagination::{PaginationQueryDto, PaginationResponseDto, TargetsPagination},
+            targets::TargetFormDto,
+        },
+        errors::ResultErrors,
+        AppState,
+    },
     database::{
         entities::targets::{NewTarget, Target},
         repositories,
@@ -33,9 +40,10 @@ pub async fn create_target(
         upstream_id,
     };
 
-    let response = repositories::targets::create(&app_state.pool, new_target)
-        .await
-        .unwrap();
+    let response = match repositories::targets::create(&app_state.pool, new_target).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok((StatusCode::CREATED, Json(response)));
 }
@@ -53,9 +61,10 @@ pub async fn delete_target(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Target>, ResultErrors> {
-    let response = repositories::targets::delete(&app_state.pool, id)
-        .await
-        .unwrap();
+    let response = match repositories::targets::delete(&app_state.pool, id).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -73,9 +82,10 @@ pub async fn find_target_by_id(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Target>, ResultErrors> {
-    let response = repositories::targets::find_by_id(&app_state.pool, id)
-        .await
-        .unwrap();
+    let response = match repositories::targets::find_by_id(&app_state.pool, id).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -102,9 +112,10 @@ pub async fn update_target(
         upstream_id,
     };
 
-    let response = repositories::targets::update(&app_state.pool, id, new_target)
-        .await
-        .unwrap();
+    let response = match repositories::targets::update(&app_state.pool, id, new_target).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -128,8 +139,7 @@ pub async fn find_targets(
 ) -> Result<Json<TargetsPagination>, ResultErrors> {
     let pagination = pagination.0;
 
-    let response = match repositories::targets::find_and_count(&app_state.pool, pagination).await
-    {
+    let response = match repositories::targets::find_and_count(&app_state.pool, pagination).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };

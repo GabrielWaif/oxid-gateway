@@ -40,9 +40,10 @@ pub async fn create_route(
         upstream_id,
     };
 
-    let response = repositories::routes::create(&app_state.pool, new_route)
-        .await
-        .unwrap();
+    let response = match repositories::routes::create(&app_state.pool, new_route).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok((StatusCode::CREATED, Json(response)));
 }
@@ -60,9 +61,10 @@ pub async fn delete_route(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Route>, ResultErrors> {
-    let response = repositories::routes::delete(&app_state.pool, id)
-        .await
-        .unwrap();
+    let response = match repositories::routes::delete(&app_state.pool, id).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -80,9 +82,10 @@ pub async fn find_route_by_id(
     Path((upstream_id, id)): Path<(i32, i32)>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Route>, ResultErrors> {
-    let response = repositories::routes::find_by_id(&app_state.pool, id)
-        .await
-        .unwrap();
+    let response = match repositories::routes::find_by_id(&app_state.pool, id).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -109,9 +112,10 @@ pub async fn update_route(
         upstream_id,
     };
 
-    let response = repositories::routes::update(&app_state.pool, id, new_route)
-        .await
-        .unwrap();
+    let response = match repositories::routes::update(&app_state.pool, id, new_route).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -134,8 +138,7 @@ pub async fn find_routes(
 ) -> Result<Json<RoutesPagination>, ResultErrors> {
     let pagination = pagination.0;
 
-    let response = match repositories::routes::find_and_count(&app_state.pool, pagination).await
-    {
+    let response = match repositories::routes::find_and_count(&app_state.pool, pagination).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };

@@ -29,9 +29,10 @@ pub async fn create_upstream(
     State(app_state): State<AppState>,
     Json(body): Json<NewUpstream>,
 ) -> Result<(StatusCode, Json<Upstream>), ResultErrors> {
-    let response = repositories::upstreams::create(&app_state.pool, body)
-        .await
-        .unwrap();
+    let response = match repositories::upstreams::create(&app_state.pool, body).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok((StatusCode::CREATED, Json(response)));
 }
@@ -49,9 +50,10 @@ pub async fn delete_upstream(
     Path(id): Path<i32>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Upstream>, ResultErrors> {
-    let response = repositories::upstreams::delete(&app_state.pool, id)
-        .await
-        .unwrap();
+    let response = match repositories::upstreams::delete(&app_state.pool, id).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -69,9 +71,10 @@ pub async fn find_upstream_by_id(
     Path(id): Path<i32>,
     State(app_state): State<AppState>,
 ) -> Result<Json<Upstream>, ResultErrors> {
-    let response = repositories::upstreams::find_by_id(&app_state.pool, id)
-        .await
-        .unwrap();
+    let response = match repositories::upstreams::find_by_id(&app_state.pool, id).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
@@ -120,9 +123,10 @@ pub async fn update_upstream(
     State(app_state): State<AppState>,
     Json(body): Json<NewUpstream>,
 ) -> Result<Json<Upstream>, ResultErrors> {
-    let response = repositories::upstreams::update(&app_state.pool, id, body)
-        .await
-        .unwrap();
+    let response = match repositories::upstreams::update(&app_state.pool, id, body).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
 
     return Ok(Json(response));
 }
