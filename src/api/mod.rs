@@ -6,7 +6,7 @@ pub mod handlers;
 use std::fmt::Display;
 
 use axum::{
-    http::HeaderValue,
+    http::{header::CONTENT_TYPE, HeaderValue},
     routing::{delete, get, post, put},
     Router,
 };
@@ -60,7 +60,10 @@ where
         .route("/consumers/:id", get(find_consumer_by_id))
         .route("/consumers/:id", delete(delete_consumer))
         .route("/consumers/:id", put(update_consumer))
-        .layer(CorsLayer::default().allow_origin("*".parse::<HeaderValue>().unwrap()))
+        .layer(CorsLayer::default()
+            .allow_origin("*".parse::<HeaderValue>().unwrap())
+            .allow_headers([CONTENT_TYPE])
+        )
         .merge(SwaggerUi::new("/swagger-ui").url("/swagger-json", ApiDoc::openapi()))
         .with_state(AppState {
             pool: postgres_pool,
