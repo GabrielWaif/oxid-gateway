@@ -5,9 +5,7 @@ use crate::database::entities::{
 };
 
 use super::dtos::{
-    pagination::{ConsumersPagination, RoutesPagination, TargetsPagination, UpstreamsPagination},
-    routes::RouteFormDto,
-    targets::TargetFormDto,
+    consumers::ConsumerFormDto, pagination::{ConsumersPagination, RoutesPagination, TargetsPagination, UpstreamsPagination}, routes::RouteFormDto, targets::TargetFormDto
 };
 
 #[derive(OpenApi)]
@@ -44,6 +42,7 @@ use super::dtos::{
     ),
     components (
         schemas (
+            ConsumerFormDto,
             NewUpstream,
             NewConsumer,
             ApiConsumer,

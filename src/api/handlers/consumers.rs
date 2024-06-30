@@ -3,10 +3,14 @@ use axum::{
     http::StatusCode,
     Json,
 };
+use uuid::Uuid;
 
 use crate::{
     api::{
-        dtos::pagination::{ConsumersPagination, PaginationQueryDto, PaginationResponseDto},
+        dtos::{
+            consumers::ConsumerFormDto,
+            pagination::{ConsumersPagination, PaginationQueryDto, PaginationResponseDto},
+        },
         errors::ResultErrors,
         AppState,
     },
@@ -22,14 +26,19 @@ use crate::{
     operation_id = "create_consumer",
     tag = "Consumers",
     responses (
-        (status = 201, body = Consumer)
+        (status = 201, body = ApiConsumer)
     )
 )]
 pub async fn create_consumer(
     State(app_state): State<AppState>,
-    Json(body): Json<NewConsumer>,
+    Json(body): Json<ConsumerFormDto>,
 ) -> Result<(StatusCode, Json<ApiConsumer>), ResultErrors> {
-    let response = match repositories::consumers::create(&app_state.pool, body).await {
+    let new_consumer = NewConsumer {
+        name: body.name,
+        api_key: Uuid::new_v4().to_string(),
+    };
+
+    let response = match repositories::consumers::create(&app_state.pool, new_consumer).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
     };
@@ -43,7 +52,7 @@ pub async fn create_consumer(
     operation_id = "delete_consumer",
     tag = "Consumers",
     responses (
-        (status = 200, body = Consumer)
+        (status = 200, body = ApiConsumer)
     )
 )]
 pub async fn delete_consumer(
@@ -64,7 +73,7 @@ pub async fn delete_consumer(
     operation_id = "find_consumer_by_id",
     tag = "Consumers",
     responses (
-        (status = 200, body = Consumer)
+        (status = 200, body = ApiConsumer)
     )
 )]
 pub async fn find_consumer_by_id(
@@ -85,13 +94,13 @@ pub async fn find_consumer_by_id(
     operation_id = "update_consumer",
     tag = "Consumers",
     responses (
-        (status = 200, body = Consumer)
+        (status = 200, body = ApiConsumer)
     )
 )]
 pub async fn update_consumer(
     Path(id): Path<i32>,
     State(app_state): State<AppState>,
-    Json(body): Json<NewConsumer>,
+    Json(body): Json<ConsumerFormDto>,
 ) -> Result<Json<ApiConsumer>, ResultErrors> {
     let response = match repositories::consumers::update(&app_state.pool, id, body).await {
         Ok(response) => response,

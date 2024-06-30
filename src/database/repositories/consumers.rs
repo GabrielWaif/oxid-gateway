@@ -2,7 +2,7 @@ use deadpool_diesel::postgres::Pool;
 use diesel::prelude::*;
 
 use crate::{
-    api::dtos::pagination::PaginationQueryDto,
+    api::dtos::{consumers::ConsumerFormDto, pagination::PaginationQueryDto},
     database::{
         entities::{
             consumers::{ApiConsumer, NewConsumer},
@@ -35,7 +35,7 @@ pub async fn create(pool: &Pool, body: NewConsumer) -> Result<ApiConsumer, Infra
     )
 }
 
-pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<ApiConsumer, InfraError> {
+pub async fn update(pool: &Pool, id: i32, body: ConsumerFormDto) -> Result<ApiConsumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
