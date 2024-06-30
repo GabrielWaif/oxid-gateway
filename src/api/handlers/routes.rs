@@ -14,7 +14,7 @@ use crate::{
         AppState,
     },
     database::{
-        entities::routes::{NewRoute, Route},
+        entities::{consumers_routes::ConsumerRoute, routes::{NewRoute, Route}},
         repositories,
     },
 };
@@ -178,3 +178,56 @@ pub async fn find_routes(
         count: response.1,
     }));
 }
+
+#[utoipa::path(
+    put,
+    path = "/consumers/{consumer_id}/routes/{id}",
+    operation_id = "link_consumer_to_route",
+    tag = "Routes",
+    responses (
+        (status = 200, body = ConsumerRoute)
+    )
+)]
+pub async fn link_consumer_to_route(
+    Path((consumer_id, id)): Path<(i32, i32)>,
+    State(app_state): State<AppState>,
+) -> Result<Json<ConsumerRoute>, ResultErrors> {
+    let response =
+        match repositories::consumers::link_consumer_to_route(&app_state.pool, consumer_id, id).await {
+            Ok(response) => response,
+            Err(e) => return Err(e.into()),
+        };
+
+    return Ok(Json(response));
+}
+
+#[utoipa::path(
+    get,
+    path = "/consumers/{consumer_id}/routes",
+    operation_id = "find_consumer_routes",
+    tag = "Routes",
+    params (
+        PaginationQueryDto
+    ),
+    responses (
+        (status = 200, body = RoutesPagination)
+    )
+)]
+pub async fn find_consumer_routes(
+    Path(consumer_id): Path<i32>,
+    State(app_state): State<AppState>,
+    pagination: Query<PaginationQueryDto>,
+) -> Result<Json<RoutesPagination>, ResultErrors> {
+    let pagination = pagination.0;
+
+    let response = match repositories::consumers::find_and_count_routes(&app_state.pool, consumer_id, pagination).await {
+        Ok(response) => response,
+        Err(e) => return Err(e.into()),
+    };
+
+    return Ok(Json(PaginationResponseDto {
+        items: response.0,
+        count: response.1,
+    }));
+}
+

@@ -1,10 +1,7 @@
 use utoipa::OpenApi;
 
 use crate::database::entities::{
-    consumers::{Consumer, NewConsumer},
-    routes::Route,
-    targets::Target,
-    upstreams::{NewUpstream, Upstream},
+    consumers::{ApiConsumer, NewConsumer}, consumers_routes::ConsumerRoute, routes::Route, targets::Target, upstreams::{NewUpstream, Upstream}
 };
 
 use super::dtos::{
@@ -37,6 +34,8 @@ use super::dtos::{
         crate::api::handlers::routes::delete_route,
         crate::api::handlers::routes::find_route_by_id,
         crate::api::handlers::routes::update_route,
+        crate::api::handlers::routes::link_consumer_to_route,
+        crate::api::handlers::routes::find_consumer_routes,
         crate::api::handlers::consumers::find_consumers,
         crate::api::handlers::consumers::create_consumer,
         crate::api::handlers::consumers::delete_consumer,
@@ -47,7 +46,7 @@ use super::dtos::{
         schemas (
             NewUpstream,
             NewConsumer,
-            Consumer,
+            ApiConsumer,
             Target,
             Upstream,
             Route,
@@ -56,7 +55,8 @@ use super::dtos::{
             UpstreamsPagination,
             TargetsPagination,
             ConsumersPagination,
-            RoutesPagination
+            RoutesPagination,
+            ConsumerRoute
         )
     ),
     tags (

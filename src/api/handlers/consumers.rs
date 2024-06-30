@@ -11,7 +11,7 @@ use crate::{
         AppState,
     },
     database::{
-        entities::consumers::{Consumer, NewConsumer},
+        entities::consumers::{ApiConsumer, NewConsumer},
         repositories,
     },
 };
@@ -28,7 +28,7 @@ use crate::{
 pub async fn create_consumer(
     State(app_state): State<AppState>,
     Json(body): Json<NewConsumer>,
-) -> Result<(StatusCode, Json<Consumer>), ResultErrors> {
+) -> Result<(StatusCode, Json<ApiConsumer>), ResultErrors> {
     let response = match repositories::consumers::create(&app_state.pool, body).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
@@ -49,7 +49,7 @@ pub async fn create_consumer(
 pub async fn delete_consumer(
     Path(id): Path<i32>,
     State(app_state): State<AppState>,
-) -> Result<Json<Consumer>, ResultErrors> {
+) -> Result<Json<ApiConsumer>, ResultErrors> {
     let response = match repositories::consumers::delete(&app_state.pool, id).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
@@ -70,7 +70,7 @@ pub async fn delete_consumer(
 pub async fn find_consumer_by_id(
     Path(id): Path<i32>,
     State(app_state): State<AppState>,
-) -> Result<Json<Consumer>, ResultErrors> {
+) -> Result<Json<ApiConsumer>, ResultErrors> {
     let response = match repositories::consumers::find_by_id(&app_state.pool, id).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),
@@ -92,7 +92,7 @@ pub async fn update_consumer(
     Path(id): Path<i32>,
     State(app_state): State<AppState>,
     Json(body): Json<NewConsumer>,
-) -> Result<Json<Consumer>, ResultErrors> {
+) -> Result<Json<ApiConsumer>, ResultErrors> {
     let response = match repositories::consumers::update(&app_state.pool, id, body).await {
         Ok(response) => response,
         Err(e) => return Err(e.into()),

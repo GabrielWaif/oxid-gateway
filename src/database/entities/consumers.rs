@@ -8,7 +8,7 @@ use utoipa::ToSchema;
 )]
 #[diesel(table_name = crate::schema::api_consumers)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
-pub struct Consumer {
+pub struct ApiConsumer {
     pub id: i32,
     pub name: String,
     pub api_key: String,

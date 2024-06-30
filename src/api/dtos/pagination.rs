@@ -2,14 +2,14 @@ use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 
 use crate::database::entities::{
-    consumers::Consumer, routes::Route, targets::Target, upstreams::Upstream,
+    consumers::ApiConsumer, routes::Route, targets::Target, upstreams::Upstream,
 };
 
 #[derive(ToSchema, Deserialize, Serialize)]
 #[aliases(
     UpstreamsPagination = PaginationResponseDto<Upstream>,
     RoutesPagination = PaginationResponseDto<Route>,
-    ConsumersPagination = PaginationResponseDto<Consumer>,
+    ConsumersPagination = PaginationResponseDto<ApiConsumer>,
     TargetsPagination = PaginationResponseDto<Target>
 )]
 pub struct PaginationResponseDto<T> {

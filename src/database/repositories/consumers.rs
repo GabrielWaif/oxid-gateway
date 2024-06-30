@@ -4,16 +4,20 @@ use diesel::prelude::*;
 use crate::{
     api::dtos::pagination::PaginationQueryDto,
     database::{
-        entities::consumers::{Consumer, NewConsumer},
+        entities::{
+            consumers::{ApiConsumer, NewConsumer},
+            consumers_routes::ConsumerRoute,
+            routes::Route,
+        },
         errors::InfraError,
         get_pool_connection,
     },
-    schema::api_consumers,
+    schema::{self, api_consumers, api_consumers_routes},
 };
 
 use super::extract_interact_error;
 
-pub async fn create(pool: &Pool, body: NewConsumer) -> Result<Consumer, InfraError> {
+pub async fn create(pool: &Pool, body: NewConsumer) -> Result<ApiConsumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -24,14 +28,14 @@ pub async fn create(pool: &Pool, body: NewConsumer) -> Result<Consumer, InfraErr
             .interact(move |conn| {
                 diesel::insert_into(api_consumers::table)
                     .values(body)
-                    .returning(Consumer::as_returning())
+                    .returning(ApiConsumer::as_returning())
                     .get_result(conn)
             })
             .await,
     )
 }
 
-pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer, InfraError> {
+pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<ApiConsumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -43,14 +47,14 @@ pub async fn update(pool: &Pool, id: i32, body: NewConsumer) -> Result<Consumer,
                 diesel::update(api_consumers::dsl::api_consumers)
                     .filter(api_consumers::id.eq(id))
                     .set((api_consumers::name.eq(body.name),))
-                    .returning(Consumer::as_returning())
+                    .returning(ApiConsumer::as_returning())
                     .get_result(conn)
             })
             .await,
     )
 }
 
-pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
+pub async fn find_by_id(pool: &Pool, id: i32) -> Result<ApiConsumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -61,14 +65,14 @@ pub async fn find_by_id(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
             .interact(move |conn| {
                 api_consumers::table
                     .filter(api_consumers::id.eq(id))
-                    .select(Consumer::as_select())
+                    .select(ApiConsumer::as_select())
                     .get_result(conn)
             })
             .await,
     )
 }
 
-pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
+pub async fn delete(pool: &Pool, id: i32) -> Result<ApiConsumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -79,7 +83,7 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
             .interact(move |conn| {
                 diesel::delete(api_consumers::dsl::api_consumers)
                     .filter(api_consumers::id.eq(id))
-                    .returning(Consumer::as_returning())
+                    .returning(ApiConsumer::as_returning())
                     .get_result(conn)
             })
             .await,
@@ -89,7 +93,7 @@ pub async fn delete(pool: &Pool, id: i32) -> Result<Consumer, InfraError> {
 pub async fn find_and_count(
     pool: &Pool,
     pagination: PaginationQueryDto,
-) -> Result<(Vec<Consumer>, i64), InfraError> {
+) -> Result<(Vec<ApiConsumer>, i64), InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -138,4 +142,98 @@ pub async fn find_and_count(
         Ok(count) => Ok((list, count)),
         Err(e) => Err(e),
     }
+}
+
+pub async fn find_and_count_routes(
+    pool: &Pool,
+    id: i32,
+    pagination: PaginationQueryDto,
+) -> Result<(Vec<Route>, i64), InfraError> {
+    let manager = match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
+
+    let consumer = match find_by_id(pool, id).await {
+        Ok(consumer) => consumer,
+        Err(e) => return Err(e),
+    };
+
+    let count_consumer = consumer.clone();
+    let count_filter = pagination.text.clone();
+
+    let list = match extract_interact_error(
+        manager
+            .interact(move |conn| {
+                let mut query = ConsumerRoute::belonging_to(&consumer)
+                    .into_boxed()
+                    .inner_join(schema::routes::table)
+                    .select(Route::as_select());
+
+                match pagination.text {
+                    Some(text) => {
+                        query = query.filter(schema::routes::path.like(format!("%{text}%")));
+                    }
+                    None => {}
+                };
+
+                query = query.offset(pagination.offset).limit(pagination.limit);
+
+                query.load(conn)
+            })
+            .await,
+    ) {
+        Ok(list) => list,
+        Err(e) => return Err(e),
+    };
+
+    match extract_interact_error(
+        manager
+            .interact(move |conn| {
+                let mut query = ConsumerRoute::belonging_to(&count_consumer)
+                    .into_boxed()
+                    .inner_join(schema::routes::table)
+                    .select(Route::as_select());
+
+                match count_filter {
+                    Some(text) => {
+                        query = query.filter(schema::routes::path.like(format!("%{text}%")));
+                    }
+                    None => {}
+                };
+
+                query.count().get_result(conn)
+            })
+            .await,
+    ) {
+        Ok(count) => Ok((list, count)),
+        Err(e) => Err(e),
+    }
+}
+
+pub async fn link_consumer_to_route(
+    pool: &Pool,
+    consumer_id: i32,
+    route_id: i32,
+) -> Result<ConsumerRoute, InfraError> {
+    let manager = match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
+
+    let relation = ConsumerRoute {
+        api_consumer_id: consumer_id,
+        route_id,
+    };
+
+    extract_interact_error(
+        manager
+            .interact(move |conn| {
+                diesel::insert_into(api_consumers_routes::table)
+                    .values(relation)
+                    .returning(ConsumerRoute::as_returning())
+                    .get_result(conn)
+            })
+            .await,
+    )
 }

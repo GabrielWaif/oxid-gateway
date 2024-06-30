@@ -48,6 +48,8 @@ where
         .route("/upstreams/:id", delete(delete_upstream))
         .route("/upstreams/:id", put(update_upstream))
         .route("/routes", get(find_routes))
+        .route("/consumers/:consumer_id/routes", get(find_consumer_routes))
+        .route("/consumers/:consumer_id/routes/:id", put(link_consumer_to_route))
         .route("/upstreams/:upstream_id/routes", get(find_routes_in_upstream))
         .route("/upstreams/:upstream_id/routes", post(create_route))
         .route("/upstreams/:upstream_id/routes/:id", get(find_route_by_id))
