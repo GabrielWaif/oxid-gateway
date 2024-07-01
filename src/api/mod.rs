@@ -6,16 +6,26 @@ pub mod handlers;
 use std::fmt::Display;
 
 use axum::{
-    routing::{delete, get, post, put},
+    body::Body,
+    extract::{Path, Request, State},
+    http::{StatusCode, Uri},
+    response::{IntoResponse, Response},
+    routing::{any, delete, get, post, put},
     Router,
 };
 use deadpool_diesel::postgres::Pool;
 use docs::ApiDoc;
+use dtos::pagination::PaginationQueryDto;
 use handlers::{consumers::*, routes::*, targets::*, upstreams::*};
+use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use tokio::net::ToSocketAddrs;
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
+
+use crate::database::repositories;
+
+type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -28,19 +38,11 @@ where
 {
     let app = Router::new()
         .route("/upstreams/:upstream_id/targets", get(find_targets))
+        .route("/proxy/{upstream_id}", any(handler))
         .route("/upstreams/:upstream_id/targets", post(create_target))
-        .route(
-            "/upstreams/:upstream_id/targets/:id",
-            get(find_target_by_id),
-        )
-        .route(
-            "/upstreams/:upstream_id/targets/:id",
-            delete(delete_target),
-        )
-        .route(
-            "/upstreams/:upstream_id/targets/:id",
-            put(update_target),
-        )
+        .route("/upstreams/:upstream_id/targets/:id", get(find_target_by_id))
+        .route("/upstreams/:upstream_id/targets/:id", delete(delete_target))
+        .route("/upstreams/:upstream_id/targets/:id", put(update_target))
         .route("/upstreams", post(create_upstream))
         .route("/upstreams", get(find_upstreams))
         .route("/upstreams/:id", get(find_upstream_by_id))
@@ -85,4 +87,54 @@ where
     tracing::info!("Serving service connection to address: {address}");
 
     axum::serve(listener, app).await.unwrap();
+}
+
+async fn handler(
+    Path(upstream_id): Path<i32>,
+    State(app_state): State<AppState>,
+    mut req: Request,
+) -> Result<Response, StatusCode> {
+    let client: Client =
+        hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
+            .build(HttpConnector::new());
+
+    let path = req.uri().path();
+
+    let path_query = req
+        .uri()
+        .path_and_query()
+        .map(|v| v.as_str())
+        .unwrap_or(path);
+
+    let response = match repositories::routes::find_and_count_in_upstream(
+        &app_state.pool,
+        upstream_id,
+        PaginationQueryDto {
+            limit: 100,
+            offset: 0,
+            text: 
+        },
+    )
+    .await
+    {
+        Ok(response) => response,
+        Err(e) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+    };
+
+    // TODO: Use route path
+    let base_path = "/proxy";
+    let inner_path = "/consumers";
+
+    let uri = format!(
+        "http://127.0.0.1:3000{}",
+        path_query.replace(base_path, inner_path)
+    );
+
+    *req.uri_mut() = Uri::try_from(uri).unwrap();
+
+    Ok(client
+        .request(req)
+        .await
+        .map_err(|_| StatusCode::BAD_REQUEST)?
+        .into_response())
 }
