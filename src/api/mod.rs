@@ -53,6 +53,10 @@ where
             put(link_consumer_to_route),
         )
         .route(
+            "/consumers/:consumer_id/routes/:id",
+            delete(unlink_consumer_to_route),
+        )
+        .route(
             "/upstreams/:upstream_id/routes",
             get(find_routes_in_upstream),
         )

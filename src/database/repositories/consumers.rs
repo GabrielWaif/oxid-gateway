@@ -35,7 +35,11 @@ pub async fn create(pool: &Pool, body: NewConsumer) -> Result<ApiConsumer, Infra
     )
 }
 
-pub async fn update(pool: &Pool, id: i32, body: ConsumerFormDto) -> Result<ApiConsumer, InfraError> {
+pub async fn update(
+    pool: &Pool,
+    id: i32,
+    body: ConsumerFormDto,
+) -> Result<ApiConsumer, InfraError> {
     let manager = match get_pool_connection(pool).await {
         Ok(manager) => manager,
         Err(e) => return Err(e),
@@ -231,6 +235,32 @@ pub async fn link_consumer_to_route(
             .interact(move |conn| {
                 diesel::insert_into(api_consumers_routes::table)
                     .values(relation)
+                    .returning(ConsumerRoute::as_returning())
+                    .get_result(conn)
+            })
+            .await,
+    )
+}
+
+pub async fn unlink_consumer_to_route(
+    pool: &Pool,
+    consumer_id: i32,
+    route_id: i32,
+) -> Result<ConsumerRoute, InfraError> {
+    let manager = match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
+
+    extract_interact_error(
+        manager
+            .interact(move |conn| {
+                diesel::delete(api_consumers_routes::dsl::api_consumers_routes)
+                    .filter(
+                        api_consumers_routes::api_consumer_id
+                            .eq(consumer_id)
+                            .and(api_consumers_routes::route_id.eq(route_id)),
+                    )
                     .returning(ConsumerRoute::as_returning())
                     .get_result(conn)
             })

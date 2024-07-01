@@ -180,6 +180,28 @@ pub async fn find_routes(
 }
 
 #[utoipa::path(
+    delete,
+    path = "/consumers/{consumer_id}/routes/{id}",
+    operation_id = "unlink_consumer_to_route",
+    tag = "Routes",
+    responses (
+        (status = 200, body = ConsumerRoute)
+    )
+)]
+pub async fn unlink_consumer_to_route(
+    Path((consumer_id, id)): Path<(i32, i32)>,
+    State(app_state): State<AppState>,
+) -> Result<Json<ConsumerRoute>, ResultErrors> {
+    let response =
+        match repositories::consumers::unlink_consumer_to_route(&app_state.pool, consumer_id, id).await {
+            Ok(response) => response,
+            Err(e) => return Err(e.into()),
+        };
+
+    return Ok(Json(response));
+}
+
+#[utoipa::path(
     put,
     path = "/consumers/{consumer_id}/routes/{id}",
     operation_id = "link_consumer_to_route",

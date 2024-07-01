@@ -33,6 +33,7 @@ use super::dtos::{
         crate::api::handlers::routes::find_route_by_id,
         crate::api::handlers::routes::update_route,
         crate::api::handlers::routes::link_consumer_to_route,
+        crate::api::handlers::routes::unlink_consumer_to_route,
         crate::api::handlers::routes::find_consumer_routes,
         crate::api::handlers::consumers::find_consumers,
         crate::api::handlers::consumers::create_consumer,
