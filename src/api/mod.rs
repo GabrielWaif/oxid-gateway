@@ -6,7 +6,6 @@ pub mod handlers;
 use std::fmt::Display;
 
 use axum::{
-    http::{header::CONTENT_TYPE, HeaderValue},
     routing::{delete, get, post, put},
     Router,
 };
@@ -14,7 +13,7 @@ use deadpool_diesel::postgres::Pool;
 use docs::ApiDoc;
 use handlers::{consumers::*, routes::*, targets::*, upstreams::*};
 use tokio::net::ToSocketAddrs;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -31,15 +30,15 @@ where
         .route("/upstreams/:upstream_id/targets", get(find_targets))
         .route("/upstreams/:upstream_id/targets", post(create_target))
         .route(
-            "/upstreams/:upstream_id/targets/targets/:id",
+            "/upstreams/:upstream_id/targets/:id",
             get(find_target_by_id),
         )
         .route(
-            "/upstreams/:upstream_id/targets/targets/:id",
+            "/upstreams/:upstream_id/targets/:id",
             delete(delete_target),
         )
         .route(
-            "/upstreams/:upstream_id/targets/targets/:id",
+            "/upstreams/:upstream_id/targets/:id",
             put(update_target),
         )
         .route("/upstreams", post(create_upstream))
@@ -49,8 +48,14 @@ where
         .route("/upstreams/:id", put(update_upstream))
         .route("/routes", get(find_routes))
         .route("/consumers/:consumer_id/routes", get(find_consumer_routes))
-        .route("/consumers/:consumer_id/routes/:id", put(link_consumer_to_route))
-        .route("/upstreams/:upstream_id/routes", get(find_routes_in_upstream))
+        .route(
+            "/consumers/:consumer_id/routes/:id",
+            put(link_consumer_to_route),
+        )
+        .route(
+            "/upstreams/:upstream_id/routes",
+            get(find_routes_in_upstream),
+        )
         .route("/upstreams/:upstream_id/routes", post(create_route))
         .route("/upstreams/:upstream_id/routes/:id", get(find_route_by_id))
         .route("/upstreams/:upstream_id/routes/:id", delete(delete_route))
@@ -60,9 +65,11 @@ where
         .route("/consumers/:id", get(find_consumer_by_id))
         .route("/consumers/:id", delete(delete_consumer))
         .route("/consumers/:id", put(update_consumer))
-        .layer(CorsLayer::default()
-            .allow_origin("*".parse::<HeaderValue>().unwrap())
-            .allow_headers([CONTENT_TYPE])
+        .layer(
+            CorsLayer::default()
+                .allow_origin(Any)
+                .allow_headers(Any)
+                .allow_methods(Any),
         )
         .merge(SwaggerUi::new("/swagger-ui").url("/swagger-json", ApiDoc::openapi()))
         .with_state(AppState {
