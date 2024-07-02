@@ -17,7 +17,6 @@ use axum::{
 use deadpool_diesel::postgres::Pool;
 use docs::ApiDoc;
 use handlers::{consumers::*, routes::*, targets::*, upstreams::*};
-use hyper_tls::HttpsConnector;
 use hyper_util::rt::TokioExecutor;
 use rand::seq::SliceRandom;
 use serde::Deserialize;
@@ -105,7 +104,12 @@ async fn handler(
     query: Query<ApiKeyQuery>,
     mut req: Request,
 ) -> Result<Response, StatusCode> {
-    let https = HttpsConnector::new();
+    let https = hyper_rustls::HttpsConnectorBuilder::new()
+        .with_native_roots()
+        .expect("no native root CA certificates found")
+        .https_or_http()
+        .enable_http1()
+        .build();
     let client: Client<_, Body> = Client::<(), ()>::builder(TokioExecutor::new()).build(https);
 
     let routes = match repositories::routes::find_all_routes(&app_state.pool).await {
