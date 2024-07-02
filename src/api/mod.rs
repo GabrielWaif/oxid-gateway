@@ -138,7 +138,8 @@ async fn handler(
     };
 
     let uri = format!(
-        "http://{}:{}{}",
+        "{}://{}:{}{}",
+        target.protocol,
         target.host,
         target.port,
         full_path.replace(&route.path, &inner_path)

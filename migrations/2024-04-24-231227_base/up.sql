@@ -6,6 +6,7 @@ CREATE TABLE upstreams (
 
 CREATE TABLE targets (
   id SERIAL PRIMARY KEY,
+  protocol VARCHAR NOT NULL,
   host VARCHAR NOT NULL,
   port INTEGER NOT NULL,
   upstream_id INTEGER NOT NULL REFERENCES upstreams(id) ON DELETE CASCADE

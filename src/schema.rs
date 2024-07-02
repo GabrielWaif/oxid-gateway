@@ -28,6 +28,7 @@ diesel::table! {
 diesel::table! {
     targets (id) {
         id -> Int4,
+        protocol -> Varchar,
         host -> Varchar,
         port -> Int4,
         upstream_id -> Int4,
