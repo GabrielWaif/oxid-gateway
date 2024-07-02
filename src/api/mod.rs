@@ -7,22 +7,23 @@ use std::fmt::Display;
 
 use axum::{
     body::Body,
-    extract::{Path, Request, State},
+    extract::{Path, Query, Request, State},
     http::{StatusCode, Uri},
     response::{IntoResponse, Response},
     routing::{any, delete, get, post, put},
     Router,
 };
 
-use rand::seq::SliceRandom;
 use deadpool_diesel::postgres::Pool;
 use docs::ApiDoc;
 use handlers::{consumers::*, routes::*, targets::*, upstreams::*};
 use hyper_tls::HttpsConnector;
 use hyper_util::rt::TokioExecutor;
+use rand::seq::SliceRandom;
+use serde::Deserialize;
 use tokio::net::ToSocketAddrs;
 use tower_http::cors::{Any, CorsLayer};
-use utoipa::OpenApi;
+use utoipa::{IntoParams, OpenApi, ToSchema};
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::database::repositories;
@@ -93,9 +94,15 @@ where
     axum::serve(listener, app).await.unwrap();
 }
 
+#[derive(ToSchema, Deserialize, IntoParams, Debug)]
+pub struct ApiKeyQuery {
+    pub api_key: Option<String>,
+}
+
 async fn handler(
     Path(path): Path<String>,
     State(app_state): State<AppState>,
+    query: Query<ApiKeyQuery>,
     mut req: Request,
 ) -> Result<Response, StatusCode> {
     let https = HttpsConnector::new();
@@ -136,6 +143,32 @@ async fn handler(
         target.port,
         full_path.replace(&route.path, &inner_path)
     );
+
+    let consumers = match repositories::routes::find_and_count_consumers(
+        &app_state.pool,
+        route.id,
+        route.upstream_id,
+    )
+    .await
+    {
+        Ok(response) => response,
+        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
+    };
+
+    if route.private {
+        match &query.api_key {
+            None => return Err(StatusCode::UNAUTHORIZED),
+            Some(key) => {
+                if consumers
+                    .iter()
+                    .find(|x| x.api_key == key.clone())
+                    .is_none()
+                {
+                    return Err(StatusCode::UNAUTHORIZED);
+                }
+            }
+        }
+    };
 
     *req.uri_mut() = Uri::try_from(uri).unwrap();
 

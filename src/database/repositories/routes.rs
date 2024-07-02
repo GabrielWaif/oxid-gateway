@@ -5,6 +5,8 @@ use crate::{
     api::dtos::pagination::PaginationQueryDto,
     database::{
         entities::{
+            consumers::ApiConsumer,
+            consumers_routes::ConsumerRoute,
             routes::{NewRoute, Route},
             targets::Target,
         },
@@ -220,11 +222,7 @@ pub async fn find_all_routes(pool: &Pool) -> Result<Vec<Route>, InfraError> {
 
     match extract_interact_error(
         manager
-            .interact(move |conn| {
-                routes::table
-                    .into_boxed()
-                    .load(conn)
-            })
+            .interact(move |conn| routes::table.into_boxed().load(conn))
             .await,
     ) {
         Ok(list) => Ok(list),
@@ -262,4 +260,32 @@ pub async fn find_all_route_targets(pool: &Pool, route_id: i32) -> Result<Vec<Ta
         Ok(list) => Ok(list),
         Err(e) => return Err(e),
     }
+}
+
+pub async fn find_and_count_consumers(
+    pool: &Pool,
+    id: i32,
+    upstream_id: i32,
+) -> Result<Vec<ApiConsumer>, InfraError> {
+    let manager = match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
+
+    let route = match find_by_id(pool, id, upstream_id).await {
+        Ok(route) => route,
+        Err(e) => return Err(e),
+    };
+
+    extract_interact_error(
+        manager
+            .interact(move |conn| {
+                ConsumerRoute::belonging_to(&route)
+                    .into_boxed()
+                    .inner_join(schema::api_consumers::table)
+                    .select(ApiConsumer::as_select())
+                    .load(conn)
+            })
+            .await,
+    )
 }
