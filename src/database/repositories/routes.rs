@@ -4,11 +4,14 @@ use diesel::prelude::*;
 use crate::{
     api::dtos::pagination::PaginationQueryDto,
     database::{
-        entities::routes::{NewRoute, Route},
+        entities::{
+            routes::{NewRoute, Route},
+            targets::Target,
+        },
         errors::InfraError,
         get_pool_connection,
     },
-    schema::routes,
+    schema::{self, routes},
 };
 
 use diesel::ExpressionMethods;
@@ -206,5 +209,57 @@ pub async fn find_and_count_in_upstream(
     ) {
         Ok(count) => Ok((list, count)),
         Err(e) => Err(e),
+    }
+}
+
+pub async fn find_all_routes(pool: &Pool) -> Result<Vec<Route>, InfraError> {
+    let manager = match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
+
+    match extract_interact_error(
+        manager
+            .interact(move |conn| {
+                routes::table
+                    .into_boxed()
+                    .load(conn)
+            })
+            .await,
+    ) {
+        Ok(list) => Ok(list),
+        Err(e) => return Err(e),
+    }
+}
+
+pub async fn find_all_route_targets(pool: &Pool, route_id: i32) -> Result<Vec<Target>, InfraError> {
+    let manager = match get_pool_connection(pool).await {
+        Ok(manager) => manager,
+        Err(e) => return Err(e),
+    };
+
+    let route: Route = extract_interact_error(
+        manager
+            .interact(move |conn| {
+                routes::table
+                    .filter(routes::id.eq(route_id))
+                    .select(Route::as_select())
+                    .get_result(conn)
+            })
+            .await,
+    )?;
+
+    match extract_interact_error(
+        manager
+            .interact(move |conn| {
+                schema::targets::table
+                    .into_boxed()
+                    .filter(schema::targets::upstream_id.eq(route.upstream_id))
+                    .load(conn)
+            })
+            .await,
+    ) {
+        Ok(list) => Ok(list),
+        Err(e) => return Err(e),
     }
 }
