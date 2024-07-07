@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oxid-gateway-admin
+  namespace: oxid-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oxid-gateway-admin
+  template:
+    metadata:
+      labels:
+        app: oxid-gateway-admin
+    spec:
+      containers:
+        - name: oxid-gateway-admin
+          image: oxid-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_URL
+              value: "postgres://postgres:admin@oxid-gateway-postgres:5432/postgres"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oxid-gateway-admin-service
+  namespace: oxid-gateway
+  labels:
+    app: oxid-gateway-admin
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: oxid-gateway-admin
+  type: LoadBalancer
