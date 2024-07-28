@@ -1,10 +1,10 @@
 # Oxid Gateway
 
+**College project first semester 2024 PAC IV**
+
 Oxid gateway is an API Gateway prototype written in Rust. This project is not meant to be used in production, and It was only created for me to understand the inner workings of API Gateway.
 
 > Note that this is only the backend/proxy, the frontend repository can be found at: [Oxid Gateway Manager](https://github.com/rosa-gabriel/oxid-gateway-manager).
-
-## College project first semester 2024 PAC IV
 
 ## Deployment
 
