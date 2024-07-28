@@ -4,9 +4,9 @@ Oxid gateway is an API Gateway prototype written in Rust. This project is not me
 
 > Note that this is only the backend/proxy, the frontend repository can be found at: [Oxid Gateway Manager](https://github.com/rosa-gabriel/oxid-gateway-manager).
 
-## College project first semester 2024 PAC |V
+## College project first semester 2024 PAC IV
 
-## How to run
+## Deployment
 
 To run this project you will need to have Kubernetes to run a `keycloak` instance:
 
